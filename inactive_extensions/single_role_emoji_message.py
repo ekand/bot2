@@ -34,7 +34,7 @@ def get_role_and_emoji_from_message(content: str):
 class RolesExtension(Extension):
     bot: CustomClient
 
-    @slash_command(name="create-role-emoji-message", scopes=[test_guild_id])
+    @slash_command(name="create-single-role-emoji-message", scopes=[test_guild_id])
     @slash_option(
         name="role_name",
         description="Role Name",
