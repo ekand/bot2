@@ -3,11 +3,16 @@ from core.base import CustomClient
 from interactions import (
     Button,
     ButtonStyle,
-    ComponentContext, Embed,
-    Extension, InteractionContext,
-    component_callback, slash_command,
+    ComponentContext,
+    Embed,
+    Extension,
+    InteractionContext,
+    component_callback,
+    slash_command,
 )
+
 # from interactions.something import ButtonStyles
+
 
 class CommandExtension(Extension):
     bot: CustomClient
@@ -18,9 +23,7 @@ class CommandExtension(Extension):
 
         # adds a component to the message
         components = Button(
-            style=ButtonStyle.GREEN,
-            label="Hiya",
-            custom_id="hello_world_button"
+            style=ButtonStyle.GREEN, label="Hiya", custom_id="hello_world_button"
         )
 
         # adds an embed to the message
@@ -28,7 +31,6 @@ class CommandExtension(Extension):
 
         # respond to the interaction
         await ctx.send("Hello World", embeds=embed, components=components)
-
 
     @component_callback("hello_world_button")
     async def my_callback(self, ctx: ComponentContext):

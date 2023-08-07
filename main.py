@@ -9,7 +9,6 @@ from core.base import CustomClient
 from core.extensions_loader import load_extensions
 
 
-
 if __name__ == "__main__":
     # load the environmental vars from the .env file
     load_dotenv()
