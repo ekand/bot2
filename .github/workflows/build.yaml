@@ -50,3 +50,6 @@ jobs:
 
     - name: 'Copy to vm'
       run: gcloud compute scp --recurse --zone us-central1-a ./* erik@instance-1:/home/erik/bot2staging
+
+    - name: 'and the .env'
+      run: gcloud compute scp --zone us-central1-a ./.env erik@instance-1:/home/erik/bot2staging/.env
