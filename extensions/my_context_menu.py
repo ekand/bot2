@@ -1,6 +1,12 @@
 from core.base import CustomClient
 
-from interactions import CommandType, InteractionContext, Message, context_menu, Extension
+from interactions import (
+    CommandType,
+    InteractionContext,
+    Message,
+    context_menu,
+    Extension,
+)
 
 
 class ContextMenuExtension(Extension):
