@@ -22,5 +22,5 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v1'
 
     - name: 'Copy to vm'
-      run: gcloud compute scp --recurse --zone us-central1-a . erik@instance-1:/home/erik/bot2staging
+      run: gcloud compute scp --recurse --zone us-central1-a ./* erik@instance-1:/home/erik/bot2staging/
   
