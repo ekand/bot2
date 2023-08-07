@@ -46,7 +46,7 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v1'
 
     - name: 'Write .env'
-      run: echo '${{ secrets.DOT_ENV }}'
+      run: echo '${{ secrets.DOT_ENV }}' > .env
 
     - name: 'Copy to vm'
       run: gcloud compute scp -a --recurse --zone us-central1-a ./* erik@instance-1:/home/erik/bot2staging
