@@ -1,3 +1,4 @@
 discord-py-interactions>=5.8.0
 orjson>=3.6.7
+pytest==7.4.0
 python-dotenv>=1.0.0
