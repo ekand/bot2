@@ -19,6 +19,6 @@ def load_extensions(bot: CustomClient):
 
                 # load the extension
                 bot.load_extension(python_import_path)
-                logging.info(f'Loaded extension from path {python_import_path}')
+                logging.info(f"Loaded extension from path {python_import_path}")
 
     # bot.logger.info(f"< {len(bot.interactions.get(0, []))} > Global Interactions Loaded")

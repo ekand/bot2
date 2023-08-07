@@ -20,12 +20,12 @@ from core.base import CustomClient
 load_dotenv()
 
 
-ALLOWED_ROLE_NAMES = ['new-role', 'other-role']
+ALLOWED_ROLE_NAMES = ["new-role", "other-role"]
 test_guild_id = os.getenv("TEST_GUILD_ID")
 
 
 def get_role_and_emoji_from_message(content: str):
-    t = content.split(' ')
+    t = content.split(" ")
     emoji = t[2]
     role = t[-1]
     return role, emoji
@@ -39,13 +39,13 @@ class RolesExtension(Extension):
         name="role_name",
         description="Role Name",
         required=True,
-        opt_type=OptionType.STRING
+        opt_type=OptionType.STRING,
     )
     @slash_option(
         name="emoji", description="Emoji", required=True, opt_type=OptionType.STRING
     )
     async def create_role_emoji_message(
-            self, ctx: SlashContext, role_name: str, emoji: str
+        self, ctx: SlashContext, role_name: str, emoji: str
     ):
         """Creates a message which users can react to with a specified
         emoji to be assgigned a role"""
@@ -57,7 +57,7 @@ class RolesExtension(Extension):
 
     @listen(MessageReactionAdd)
     async def on_message_reaction_add(
-            self, reaction: interactions.api.events.MessageReactionAdd
+        self, reaction: interactions.api.events.MessageReactionAdd
     ):
         if reaction.author.id == self.bot.user.id:
             return
@@ -79,7 +79,7 @@ class RolesExtension(Extension):
 
     @listen(MessageReactionRemove)
     async def on_message_reaction_remove(
-            self, reaction: interactions.api.events.MessageReactionRemove
+        self, reaction: interactions.api.events.MessageReactionRemove
     ):
         if reaction.author.id == self.bot.user.id:
             return

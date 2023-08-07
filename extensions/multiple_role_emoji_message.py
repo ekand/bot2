@@ -12,22 +12,23 @@ from interactions import (
     SlashContext,
     listen,
     InteractionContext,
-    Modal, ShortText,
-    ModalContext
+    Modal,
+    ShortText,
+    ModalContext,
 )
 from interactions.api.events import MessageReactionAdd, MessageReactionRemove
 
-ALLOWED_ROLE_NAMES = ['new-role', 'other-role']
+ALLOWED_ROLE_NAMES = ["new-role", "other-role"]
 
 
 def get_role_and_emoji_from_message(content: str):
-    lines = content.split('\n')
+    lines = content.split("\n")
 
     for line in lines:
-        if not line.startswith('React'):
+        if not line.startswith("React"):
             continue
         try:
-            t = line.split(' ')
+            t = line.split(" ")
             emoji = t[2]
             role_name = t[-1]
             assert role_name in ALLOWED_ROLE_NAMES
@@ -37,21 +38,29 @@ def get_role_and_emoji_from_message(content: str):
         except AssertionError:
             yield None, None
 
+
 def construct_message_content(role_name, emoji, lines):
     return
 
 
 class RolesExtension(Extension):
     bot: CustomClient
+
     def __init__(self, bot):
         self.current_role_message = None
 
-
-    @slash_command(name="how-do-i-role-emoji", description="Instructions for how to create a role emoji reaction message")
+    @slash_command(
+        name="how-do-i-role-emoji",
+        description="Instructions for how to create a role emoji reaction message",
+    )
     async def how_do_i(self, ctx: SlashContext):
-        await ctx.send("Use /start-role-emoji-message to initialize the message, then use /add-role-to-message one or more times")
+        await ctx.send(
+            "Use /start-role-emoji-message to initialize the message, then use /add-role-to-message one or more times"
+        )
 
-    @slash_command(name="start-role-emoji-message", description="Create Role Assigning Message")
+    @slash_command(
+        name="start-role-emoji-message", description="Create Role Assigning Message"
+    )
     async def start_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
         self.current_role_message = current_role_message
@@ -61,7 +70,7 @@ class RolesExtension(Extension):
         name="role_name",
         description="Role Name",
         required=True,
-        opt_type=OptionType.STRING
+        opt_type=OptionType.STRING,
     )
     @slash_option(
         name="emoji", description="Emoji", required=True, opt_type=OptionType.STRING
@@ -74,25 +83,24 @@ class RolesExtension(Extension):
             return
         bot_message = self.current_role_message
         content = bot_message.content
-        content += '\n' + message_content
+        content += "\n" + message_content
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
         await ctx.send(f"Added role {role_name} with emoji {emoji}")
         return
         pass  # todo add rolename and string to temporary structure
 
-
-
-
     @listen(MessageReactionAdd)
     async def on_message_reaction_add(
-            self, reaction: interactions.api.events.MessageReactionAdd
+        self, reaction: interactions.api.events.MessageReactionAdd
     ):
         if reaction.author.id == self.bot.user.id:
             return
         if reaction.message.author.id != reaction.bot.user.id:
             return
-        for role_name, emoji in get_role_and_emoji_from_message(reaction.message.content):
+        for role_name, emoji in get_role_and_emoji_from_message(
+            reaction.message.content
+        ):
             if role_name is None:
                 continue
             if role_name not in ALLOWED_ROLE_NAMES:
@@ -110,7 +118,7 @@ class RolesExtension(Extension):
 
     @listen(MessageReactionRemove)
     async def on_message_reaction_remove(
-            self, reaction: interactions.api.events.MessageReactionRemove
+        self, reaction: interactions.api.events.MessageReactionRemove
     ):
         if reaction.author.id == self.bot.user.id:
             return
@@ -118,7 +126,9 @@ class RolesExtension(Extension):
             return
         role_name = reaction.message.content.split()[-1]
         selected_role = None
-        for role_name, emoji in get_role_and_emoji_from_message(reaction.message.content):
+        for role_name, emoji in get_role_and_emoji_from_message(
+            reaction.message.content
+        ):
             if role_name is None:
                 continue
             if role_name not in ALLOWED_ROLE_NAMES:
@@ -132,9 +142,9 @@ class RolesExtension(Extension):
             if selected_role is not None:
                 await reaction.author.remove_role(selected_role.id)
             else:
-                logging.warning("on_message_reaction_remove(): role_name not recognized")
-
-
+                logging.warning(
+                    "on_message_reaction_remove(): role_name not recognized"
+                )
 
     # @slash_option(
     #     name="role_name",
@@ -194,14 +204,7 @@ class RolesExtension(Extension):
     #         emoji = line[2]
     #         await bot_message.add_reaction(emoji)
 
-
-
-
-
-
-
-
-        # adds a component to the message
+    # adds a component to the message
 
 
 def setup(bot: CustomClient):
