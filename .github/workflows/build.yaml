@@ -9,7 +9,7 @@ on:
       - main
       - dev
 jobs:
-  job_id:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - name: 'checkout'
@@ -21,11 +21,6 @@ jobs:
         project_id: '${{ secrets.GCP_PROJECT }}'
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
-
-
-
-    - name: 'cd ..'
-      run: cd bot2
 
     - name: 'Write .env'
       run: echo '${{ secrets.DOT_ENV }}'
