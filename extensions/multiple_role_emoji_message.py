@@ -22,6 +22,11 @@ ALLOWED_ROLE_NAMES = ["new-role", "other-role"]
 
 
 def get_role_and_emoji_from_message(content: str):
+    """Takes content from the role emoji reaction message, which can look like the following:
+    Role Emoji Reaction Message
+    React with 🌞 to gain role new-role
+    React with 👒 to gain role other-role
+    """
     lines = content.split("\n")
 
     for line in lines:
