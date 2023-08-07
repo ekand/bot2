@@ -16,10 +16,11 @@ jobs:
       uses: 'google-github-actions/auth@v1'
       with:
         credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+        project_id: '${{ secrets.GCP_PROJECT }}'
 
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
 
-    - name: 'Use gcloud CLI'
-      run: 'gcloud info'
+    - name: 'Copy to vm'
+      run: gcloud compute scp --recurse . erik@instance-1:/home/erik/bot2staging
   
