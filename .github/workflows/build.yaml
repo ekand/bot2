@@ -41,8 +41,7 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.3.0
         with:
-          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
-          project_id: ${{ secrets.GCLOUD_PROJECT }}
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       - name: Deploy to Google VM
         run: |
