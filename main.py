@@ -1,7 +1,7 @@
 import os
 
 
-from interactions import Intents, Task, IntervalTrigger, listen
+from interactions import Intents, Task, IntervalTrigger, listen, Client
 from interactions.ext.debug_extension import DebugExtension
 
 from core.init_logging import init_logging
@@ -21,11 +21,12 @@ if __name__ == "__main__":
     init_logging()
 
     # create our bot instance
-    bot = CustomClient(
-        intents=Intents.DEFAULT,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
-        auto_defer=True,  # automatically deferring interactions
-        activity="Another interactions.py bot",  # the status message of the bot
-    )
+    bot = Client(intents=Intents.DEFAULT, activity="Another interactions.py bot")
+    # bot = CustomClient(
+    #     intents=Intents.DEFAULT,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
+    #     auto_defer=True,  # automatically deferring interactions
+    #     activity="Another interactions.py bot",  # the status message of the bot
+    # )
 
     # load the debug extension if that is wanted
     if os.getenv("LOAD_DEBUG_COMMANDS") == "true":
