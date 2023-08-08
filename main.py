@@ -8,7 +8,11 @@ from core.init_logging import init_logging
 from core.base import CustomClient
 from core.extensions_loader import load_extensions
 
+import os
 from dotenv import load_dotenv
+
+load_dotenv()
+test_guild_id = os.getenv("TEST_GUILD_ID")
 
 
 from tasks import task
@@ -21,12 +25,14 @@ if __name__ == "__main__":
     init_logging()
 
     # create our bot instance
-    bot = Client(intents=Intents.DEFAULT, activity="Another interactions.py bot")
-    # bot = CustomClient(
-    #     intents=Intents.DEFAULT,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
-    #     auto_defer=True,  # automatically deferring interactions
-    #     activity="Another interactions.py bot",  # the status message of the bot
-    # )
+    # bot = Client(intents=Intents.DEFAULT, activity="Another interactions.py bot")
+    bot = CustomClient(
+        intents=Intents.DEFAULT,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
+        auto_defer=False,  # True  # automatically deferring interactions
+        activity="Another interactions.py bot",  # the status message of the bot
+        sync_interactions=True,
+        del_unused_app_cmd=True,
+    )
 
     # load the debug extension if that is wanted
     if os.getenv("LOAD_DEBUG_COMMANDS") == "true":
