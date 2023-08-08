@@ -1,13 +1,17 @@
 import os
 
-from dotenv import load_dotenv
-from interactions import Intents
+
+from interactions import Intents, Task, IntervalTrigger, listen
 from interactions.ext.debug_extension import DebugExtension
 
 from core.init_logging import init_logging
 from core.base import CustomClient
 from core.extensions_loader import load_extensions
 
+from dotenv import load_dotenv
+
+
+from tasks import task
 
 if __name__ == "__main__":
     # load the environmental vars from the .env file

@@ -18,6 +18,12 @@ from interactions import (
 )
 from interactions.api.events import MessageReactionAdd, MessageReactionRemove
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+test_guild_id = os.getenv("TEST_GUILD_ID")
+
 ALLOWED_ROLE_NAMES = ["new-role", "other-role"]
 
 
@@ -44,10 +50,6 @@ def get_role_and_emoji_from_message(content: str):
             yield None, None
 
 
-def construct_message_content(role_name, emoji, lines):
-    return
-
-
 class RolesExtension(Extension):
     bot: CustomClient
 
@@ -64,7 +66,9 @@ class RolesExtension(Extension):
         )
 
     @slash_command(
-        name="start-role-emoji-message", description="Create Role Assigning Message"
+        name="start-role-emoji-message",
+        description="Create Role Assigning Message",
+        scopes=[test_guild_id],
     )
     async def start_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
@@ -150,66 +154,6 @@ class RolesExtension(Extension):
                 logging.warning(
                     "on_message_reaction_remove(): role_name not recognized"
                 )
-
-    # @slash_option(
-    #     name="role_name",
-    #     description="Role Name",
-    #     required=True,
-    #     opt_type=OptionType.STRING
-    # )
-    # @slash_option(
-    #     name="emoji", description="Emoji", required=True, opt_type=OptionType.STRING
-    # )
-    # @slash_option(
-    #     name="add-another-role",
-    #     description="Would you like to add another role to the message?",
-    #     required=True,
-    #     opt_type=OptionType.BOOLEAN)
-
-    # @slash_command(name="create-role-emoji-message", description="Create Role Assigning Message")
-    # async def create_role_emoji_message(self, ctx: InteractionContext):
-    #     """Creates a mesage that users can react to, to be assigned roles."""
-    #     first_call = True
-    #     add_another_role = False
-    #     modal_ctx = None
-    #     lines = []
-    #     while first_call or add_another_role:
-    #         my_modal = Modal(
-    #             ShortText(label="Role Name", custom_id="role_name"),
-    #             ShortText(label="Emoji", custom_id="emoji"),
-    #             ShortText(label="Add Another Role", custom_id='add_another_role', value='No'),
-    #             title="Add a role to the message",
-    #         )
-    #         await ctx.send_modal(modal=my_modal)
-    #
-    #         modal_ctx: ModalContext = await ctx.bot.wait_for_modal(my_modal)
-    #         role_name = modal_ctx.responses['role_name']
-    #         emoji = modal_ctx.responses['emoji']
-    #         add_another_role_str = modal_ctx.responses['add_another_role']
-    #         add_another_role = add_another_role_str.lower() == 'yes'
-    #         lines.append(f"React with {emoji} to gain role {role_name}")
-    #     print(lines)
-    #
-    #     return
-    #         #
-    #         # add_another_role =
-    #     if role_name not in ALLOWED_ROLE_NAMES:
-    #         return  # todo give an error or warning message to user
-    #     if first_call:
-    #         lines = []
-    #     while first_call or add_another_role:
-    #         first_call = False
-    #         lines.append(f"React with {emoji} to gain role {role_name}")
-    #         if not add_another_role:
-    #             break
-    #
-    #     message_content = '\n'.join(lines)
-    #     bot_message = await ctx.send(message_content)
-    #     for line in lines:
-    #         emoji = line[2]
-    #         await bot_message.add_reaction(emoji)
-
-    # adds a component to the message
 
 
 def setup(bot: CustomClient):
