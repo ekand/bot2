@@ -26,7 +26,7 @@ class CommandExtension(Extension):
     @slash_command(
         name="hello_world_new",
         description="My first command :)",
-        scopes=[test_guild_id],
+        # scopes=[test_guild_id],
     )
     async def my_command(self, ctx: InteractionContext):
         """Says hello to the world"""

@@ -1,24 +1,23 @@
 from core.base import CustomClient
 
-import os
-
 from interactions import Extension, InteractionContext, slash_command
 
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")
 
 
-class HelloCam(Extension):
+class Latency(Extension):
     bot: CustomClient
 
     @slash_command(
-        name="hello-cam", description="say hello to cam.", scopes=[test_guild_id]
+        name="latency", description="Get client latency"  # , scopes=[test_guild_id]
     )
-    async def hello_cam(self, ctx: InteractionContext):
-        await ctx.send("Hello from Cam")
+    async def latency(self, ctx: InteractionContext):
+        await ctx.send(f"{(ctx.client.latency * 1000)}ms")
 
 
 def setup(bot: CustomClient):
-    HelloCam(bot)
+    Latency(bot)

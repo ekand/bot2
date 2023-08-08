@@ -19,7 +19,7 @@ class ContextMenuExtension(Extension):
     bot: CustomClient
 
     @context_menu(
-        name="repeat", context_type=CommandType.MESSAGE, scopes=[test_guild_id]
+        name="repeat", context_type=CommandType.MESSAGE  # , scopes=[test_guild_id]
     )
     async def my_context_menu(self, ctx: InteractionContext):
         """Repeat the message on which the context menu was used"""

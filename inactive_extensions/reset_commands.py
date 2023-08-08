@@ -12,7 +12,10 @@ test_guild_id = os.getenv("TEST_GUILD_ID")
 class Reset(Extension):
     bot: CustomClient
 
-    @slash_command(name="reset", description="Ping...", scopes=[test_guild_id])
+    @slash_command(
+        name="reset",
+        description="Ping...",  #  scopes=[test_guild_id]
+    )
     async def ping(self, ctx: InteractionContext):
         pass
         # await ctx.send(f"resseting!")

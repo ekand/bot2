@@ -68,7 +68,7 @@ class RolesExtension(Extension):
     @slash_command(
         name="start-role-emoji-message",
         description="Create Role Assigning Message",
-        scopes=[test_guild_id],
+        #  scopes=[test_guild_id],
     )
     async def start_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
