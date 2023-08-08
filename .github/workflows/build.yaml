@@ -44,8 +44,11 @@ jobs:
     - name: 'Write .env'
       run: echo '${{ secrets.DOT_ENV }}' > .env
 
+    - name: 'create dir on vm'
+      run: 'mkdir tmptmptmp && gcloud compute scp --recurse --zone us-central1-a tmptmptmp erik@instance-1:/home/erik/bot2staging${{ github.sha }}'
+
     - name: 'Copy to vm'
-      run: gcloud compute scp --recurse --zone us-central1-a ./* erik@instance-1:/home/erik/bot2staging
+      run: 'gcloud compute scp --recurse --zone us-central1-a ./* erik@instance-1:/home/erik/bot2staging${{ github.sha }}'
 
     - name: 'and the .env'
-      run: gcloud compute scp --zone us-central1-a ./.env erik@instance-1:/home/erik/bot2staging/.env
+      run: 'gcloud compute scp --zone us-central1-a ./.env erik@instance-1:/home/erik/bot2stage${{ github.sha }}/.env'
