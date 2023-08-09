@@ -1,7 +1,8 @@
 import asyncio
 
 from core.base import CustomClient
-
+import traceback
+from interactions.api.events import CommandError
 import interactions
 
 import logging
@@ -55,8 +56,18 @@ def get_role_and_emoji_from_message(content: str):
 class RolesExtension(Extension):
     bot: CustomClient
 
-    def __init__(self, bot):
-        self.current_role_message = None
+    def __init__(self):
+        self.dict_of_guild_id_to_current_role_message = (
+            None  # current role message is a message object. # todo save to pickle
+        )
+
+    @listen(
+        CommandError, disable_default_listeners=True
+    )  # tell the dispatcher that this replaces the default listener
+    async def on_command_error(self, event: CommandError):
+        traceback.print_exception(event.error)  # todo: send to log instead
+        if not event.ctx.responded:
+            await event.ctx.send("Something went wrong.")
 
     @slash_command(
         name="how-do-i-role-emoji",
@@ -74,7 +85,9 @@ class RolesExtension(Extension):
     )
     async def start_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
-        self.current_role_message = current_role_message
+        self.dict_of_guild_id_to_current_role_message[
+            ctx.guild.id
+        ] = current_role_message
 
     @slash_command(name="add-role-to-message")
     @slash_option(
@@ -90,15 +103,18 @@ class RolesExtension(Extension):
         if role_name not in ALLOWED_ROLE_NAMES:
             return  # todo give an error or warning message to user
         message_content = f"React with {emoji} to gain role {role_name}"
-        if self.current_role_message is None:
-            return
-        bot_message = self.current_role_message
+        current_role_message = self.dict_of_guild_id_to_current_role_message.get(
+            ctx.guild.id
+        )
+        if current_role_message is None:
+            raise ValueError
+        bot_message = current_role_message
         content = bot_message.content
         content += "\n" + message_content
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
         sent_message = await ctx.send(f"Role added", ephemeral=True)
-        await asyncio.sleep(2)
+        await asyncio.sleep(3)
         await sent_message.delete()
         return
         pass  # todo add rolename and string to temporary structure
