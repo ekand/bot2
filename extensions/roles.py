@@ -97,7 +97,7 @@ class RolesExtension(Extension):
         content += "\n" + message_content
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
-        sent_message = await ctx.send(f"Role added")
+        sent_message = await ctx.send(f"Role added", ephemeral=True)
         await asyncio.sleep(2)
         await sent_message.delete()
         return
