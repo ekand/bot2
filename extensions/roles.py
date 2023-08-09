@@ -1,73 +1,41 @@
-import asyncio
+import logging
+import os
+
+import interactions
+from dotenv import load_dotenv
+from interactions import Extension
+from interactions import InteractionContext
+from interactions import listen
+from interactions import OptionType
+from interactions import slash_command
+from interactions import slash_option
+from interactions import SlashContext
+from interactions.api.events import MessageReactionAdd
+from interactions.api.events import MessageReactionRemove
 
 from core.base import CustomClient
-import traceback
-from interactions.api.events import CommandError
-import interactions
 
-import logging
-
-from interactions import (
-    Extension,
-    slash_command,
-    slash_option,
-    OptionType,
-    SlashContext,
-    listen,
-    InteractionContext,
-    Modal,
-    ShortText,
-    ModalContext,
-)
-from interactions.api.events import MessageReactionAdd, MessageReactionRemove
-
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")
 
-ALLOWED_ROLE_NAMES = ["new-role", "other-role"]
+DISALLOWED_ROLE_NAMES = ["admin"]
 
 
-def get_role_and_emoji_from_message(content: str):
-    """Takes content from the role emoji reaction message, which can look like the following:
-    Role Emoji Reaction Message
-    React with 🌞 to gain role new-role
-    React with 👒 to gain role other-role
-    """
-    lines = content.split("\n")
-
-    for line in lines:
-        if not line.startswith("React"):
-            continue
-        try:
-            t = line.split(" ")
-            emoji = t[2]
-            role_name = t[-1]
-            assert role_name in ALLOWED_ROLE_NAMES
-            yield role_name, emoji
-        except IndexError:
-            yield None, None
-        except AssertionError:
-            yield None, None
+logging.basicConfig(
+    filename="logs/interactions.log",
+    level=logging.INFO,
+    format="%(asctime)s UTC || %(levelname)s || %(message)s",
+)
 
 
 class RolesExtension(Extension):
     bot: CustomClient
 
-    def __init__(self):
+    def __init__(self, bot):
         self.dict_of_guild_id_to_current_role_message = (
-            None  # current role message is a message object. # todo save to pickle
-        )
-
-    @listen(
-        CommandError, disable_default_listeners=True
-    )  # tell the dispatcher that this replaces the default listener
-    async def on_command_error(self, event: CommandError):
-        traceback.print_exception(event.error)  # todo: send to log instead
-        if not event.ctx.responded:
-            await event.ctx.send("Something went wrong.")
+            {}
+        )  # current role message is a message object. # todo save to pickle
 
     @slash_command(
         name="how-do-i-role-emoji",
@@ -100,22 +68,27 @@ class RolesExtension(Extension):
         name="emoji", description="Emoji", required=True, opt_type=OptionType.STRING
     )
     async def add_role_to_message(self, ctx: SlashContext, role_name: str, emoji: str):
-        if role_name not in ALLOWED_ROLE_NAMES:
-            return  # todo give an error or warning message to user
+        if role_name in DISALLOWED_ROLE_NAMES:
+            raise ValueError  # todo give an error or warning message to user
         message_content = f"React with {emoji} to gain role {role_name}"
+        if len(self.dict_of_guild_id_to_current_role_message.keys()) == 0:
+            logging.error(
+                "in extensions.roles, in add_role_to_message, len(self.dict_of_guild_id_to_current_role_message.keys()) == 0"
+            )
+            raise ValueError(
+                "len(self.dict_of_guild_id_to_current_role_message.keys()) == 0"
+            )
         current_role_message = self.dict_of_guild_id_to_current_role_message.get(
             ctx.guild.id
         )
         if current_role_message is None:
-            raise ValueError
+            raise ValueError("current_role_message is None")
         bot_message = current_role_message
         content = bot_message.content
         content += "\n" + message_content
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
-        sent_message = await ctx.send(f"Role added", ephemeral=True)
-        await asyncio.sleep(3)
-        await sent_message.delete()
+        await ctx.send(f"Role added", ephemeral=True)
         return
         pass  # todo add rolename and string to temporary structure
 
@@ -132,7 +105,7 @@ class RolesExtension(Extension):
         ):
             if role_name is None:
                 continue
-            if role_name not in ALLOWED_ROLE_NAMES:
+            if role_name in DISALLOWED_ROLE_NAMES:
                 continue  # todo give error
             selected_role = None
             if emoji != reaction.emoji.name:
@@ -160,7 +133,7 @@ class RolesExtension(Extension):
         ):
             if role_name is None:
                 continue
-            if role_name not in ALLOWED_ROLE_NAMES:
+            if role_name in DISALLOWED_ROLE_NAMES:
                 continue  # todo give error
             selected_role = None
             if emoji != reaction.emoji.name:
@@ -180,3 +153,26 @@ def setup(bot: CustomClient):
     """Let interactions load the extension"""
 
     RolesExtension(bot)
+
+
+def get_role_and_emoji_from_message(content: str):
+    """Takes content from the role emoji reaction message, which can look like the following:
+    Role Emoji Reaction Message
+    React with 🌞 to gain role new-role
+    React with 👒 to gain role other-role
+    """
+    lines = content.split("\n")
+
+    for line in lines:
+        if not line.startswith("React"):
+            continue
+        try:
+            t = line.split(" ")
+            emoji = t[2]
+            role_name = t[-1]
+            assert role_name not in DISALLOWED_ROLE_NAMES
+            yield role_name, emoji
+        except IndexError:
+            yield None, None
+        except AssertionError:
+            yield None, None

@@ -1,9 +1,13 @@
-from core.base import CustomClient
-
-from interactions import Extension, Task, IntervalTrigger, listen
-
+import logging
 import os
+
 from dotenv import load_dotenv
+from interactions import Extension
+from interactions import IntervalTrigger
+from interactions import listen
+from interactions import Task
+
+from core.base import CustomClient
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")

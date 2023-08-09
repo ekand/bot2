@@ -1,7 +1,9 @@
 import logging
 import os
 
-from interactions import Client, listen, logger_name
+from interactions import Client
+from interactions import listen
+from interactions import logger_name
 
 
 class CustomClient(Client):

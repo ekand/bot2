@@ -1,15 +1,13 @@
-from core.base import CustomClient
-
-from interactions import (
-    CommandType,
-    InteractionContext,
-    Message,
-    context_menu,
-    Extension,
-)
-
 import os
+
 from dotenv import load_dotenv
+from interactions import CommandType
+from interactions import context_menu
+from interactions import Extension
+from interactions import InteractionContext
+from interactions import Message
+
+from core.base import CustomClient
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")
