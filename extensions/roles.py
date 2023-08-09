@@ -1,3 +1,5 @@
+import asyncio
+
 from core.base import CustomClient
 
 import interactions
@@ -95,7 +97,9 @@ class RolesExtension(Extension):
         content += "\n" + message_content
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
-        await ctx.send(f"Added role {role_name} with emoji {emoji}")
+        sent_message = await ctx.send(f"Role added")
+        await asyncio.sleep(2)
+        await sent_message.delete()
         return
         pass  # todo add rolename and string to temporary structure
 
