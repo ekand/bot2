@@ -117,7 +117,7 @@ WantedBy=multi-user.target" > /etc/systemd/system/discord-bot2.service
     on_host_maintenance = "MIGRATE"
     provisioning_model  = "STANDARD"
   }
-  tags = ["load-balanced-backend"]
+  tags = ["load-balanced-backend", "allow-iap-ssh"]
 
   # NOTE: the name of this resource must be unique for every update;
   #       this is wy we have a app_version in the name; this way
