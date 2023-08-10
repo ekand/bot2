@@ -70,6 +70,7 @@ resource "google_compute_instance_template" "default" {
   }
   machine_type = "e2-micro"
   metadata = {
+    enable-oslogin = "false"
     startup-script = <<EOF
     #! /bin/bash
     sudo apt-get update
@@ -211,6 +212,19 @@ resource "google_compute_forwarding_rule" "colored" {
   network               = var.google_compute_network.id
   ip_address            = google_compute_address.active.id
   network_tier          = "STANDARD"
+}
+
+resource "google_compute_firewall" "allow_iap_ssh" {
+  name    = "allow-iap-ssh"
+  network = var.google_compute_network.id  # Change to the appropriate network name if needed
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"]
+  target_tags  = ["allow-iap-ssh"]
 }
 
 output "google_compute_instance_group_manager_default" {
