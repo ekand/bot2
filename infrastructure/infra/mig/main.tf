@@ -79,14 +79,15 @@ apt-get update
 apt-get install -yq git supervisor python python-pip python3-distutils
 sudo apt-get install -y build-essential zlib1g-dev libssl-dev
 sudo apt-get install -y libreadline-dev libbz2-dev libsqlite3-dev libffi-dev
+export HOME=/root
 curl -sS https://webi.sh/pyenv | sh
 pyenv install -v 3.10.7
 pyenv global 3.10.7
 curl -sSL https://install.python-poetry.org | python3 -
 
 # Fetch source code
-export HOME=/root
-git clone https://github.com/ekand/bot2.git /opt/app
+
+git clone https://github.com/ekand/bot2.git /opt/app/bot2
 gcloud secrets versions access 1 --secret=dot-env > /opt/app/bot2/.env
 
 ## Install Cloud Ops Agent
