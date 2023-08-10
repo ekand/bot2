@@ -74,34 +74,40 @@ resource "google_compute_instance_template" "default" {
     enable-oslogin = "false"
     startup-script = <<EOF
     #! /bin/bash
-    sudo apt-get update
-    # required
-    sudo apt-get install -y build-essential zlib1g-dev libssl-dev
-    sudo apt-get install -y libreadline-dev libbz2-dev libsqlite3-dev libffi-dev
-    curl -sS https://webi.sh/pyenv | sh
-    pyenv install -v 3.10.7
-    pyenv global 3.10.7
-    curl -sSL https://install.python-poetry.org | python3 -
-    git clone https://github.com/ekand/bot2.git
-    cd bot2
-    gcloud secrets versions access 1 --secret=dot-env > .env
-    export BOT2_WORKING_DIR=$(pwd)
-    export BOT2_PYTHON_FILE_NAME=main.py
-    poetry shell
-    poetry install
-    export POETRY_ENV_EXECUTABLE = $(which python)
-    vm_hostname="$(curl -H "Metadata-Flavor:Google" \
-    http://169.254.169.254/computeMetadata/v1/instance/name)"
-    sudo echo "[Unit]
-Description=Discord Bot2
-After=multi-user.target
-[Service]
-Type=simple
-Restart=always
-ExecStart="$(poetry shell && which python) /home/bot2/main.py"
-[Install]
-WantedBy=multi-user.target" > /etc/systemd/system/discord-bot2.service
-    sudo systemctl restart discord-bot2
+    # Install or update needed software
+apt-get update
+apt-get install -yq git supervisor python python-pip python3-distutils
+sudo apt-get install -y build-essential zlib1g-dev libssl-dev
+sudo apt-get install -y libreadline-dev libbz2-dev libsqlite3-dev libffi-dev
+curl -sS https://webi.sh/pyenv | sh
+pyenv install -v 3.10.7
+pyenv global 3.10.7
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Fetch source code
+export HOME=/root
+git clone https://github.com/ekand/bot2.git /opt/app
+gcloud secrets versions access 1 --secret=dot-env > /opt/app/bot2/.env
+
+## Install Cloud Ops Agent
+#sudo bash /opt/app/gce/add-google-cloud-ops-agent-repo.sh --also-install
+
+# Account to own server process
+useradd -m -d /home/pythonapp pythonapp
+
+# Python environment setup
+cd /opt/app/bot2
+poetry install  # install venv to /opt/app/bot2/.venv
+
+# Set ownership to newly created account
+chown -R pythonapp:pythonapp /opt/app
+
+# Put supervisor configuration in proper place
+cp /opt/app/bot2/infrastructure/python-app.conf /etc/supervisor/conf.d/python-app.conf
+
+# Start service via supervisorctl
+supervisorctl reread
+supervisorctl update
     EOF
   }
   network_interface {
