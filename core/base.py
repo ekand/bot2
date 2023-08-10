@@ -9,9 +9,9 @@ from interactions import logger_name
 class CustomClient(Client):
     """Subclass of interactions.Client with our own logger and on_startup event"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, python_project_root_dir, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.super_secret_guild_id = 5
+        self.python_project_root_dir = python_project_root_dir
 
     # you can use that logger in all your extensions
     logger = logging.getLogger(logger_name)

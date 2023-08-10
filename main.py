@@ -40,6 +40,7 @@ if __name__ == "__main__":
         activity="Another interactions.py bot",  # the status message of the bot
         sync_interactions=True,
         del_unused_app_cmd=True,
+        python_project_root_dir=dir_name,
     )
     if config.SENTRY_EXTENSION:
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))
