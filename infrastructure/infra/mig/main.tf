@@ -52,6 +52,7 @@ locals {
   l7-xlb-backend-template        = "${var.ns}${var.color}-l7-xlb-backend-template-${var.app_version}"
   l7-xlb-group-manager           = "${var.ns}${var.color}-l7-xlb-group-manager-${var.app_version}"
   base_instance_name             = "${var.ns}${var.color}-vm"
+  firewall-name                  = "${var.ns}${var.color}-firewall"
 }
 
 # [START cloudbuild_create_before_destroy]
@@ -215,7 +216,7 @@ resource "google_compute_forwarding_rule" "colored" {
 }
 
 resource "google_compute_firewall" "allow_iap_ssh" {
-  name    = "allow-iap-ssh"
+  name    = local.firewall-name
   network = var.google_compute_network.id  # Change to the appropriate network name if needed
 
   allow {
