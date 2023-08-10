@@ -13,7 +13,7 @@ from core.base import CustomClient
 # load_dotenv()
 # test_guild_id = os.getenv("TEST_GUILD_ID")
 
-logger = logging.getLogger(logger_name)
+# logger = logging.getLogger(logger_name)
 
 
 class Ping(Extension):
@@ -21,7 +21,7 @@ class Ping(Extension):
 
     @slash_command(name="ping", description="Ping...")  # , scopes=[test_guild_id]
     async def ping(self, ctx: InteractionContext):
-        logger.info("got a ping")
+        # logger.info("got a ping")
         await ctx.send(f"Pong!")
 
 

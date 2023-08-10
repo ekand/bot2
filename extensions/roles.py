@@ -22,11 +22,11 @@ test_guild_id = os.getenv("TEST_GUILD_ID")
 DISALLOWED_ROLE_NAMES = ["admin"]
 
 
-logging.basicConfig(
-    filename="logs/interactions.log",
-    level=logging.INFO,
-    format="%(asctime)s UTC || %(levelname)s || %(message)s",
-)
+# logging.basicConfig(
+#     filename="logs/interactions.log",
+#     level=logging.INFO,
+#     format="%(asctime)s UTC || %(levelname)s || %(message)s",
+# )
 
 
 class RolesExtension(Extension):
@@ -72,9 +72,9 @@ class RolesExtension(Extension):
             raise ValueError  # todo give an error or warning message to user
         message_content = f"React with {emoji} to gain role {role_name}"
         if len(self.dict_of_guild_id_to_current_role_message.keys()) == 0:
-            logging.error(
-                "in extensions.roles, in add_role_to_message, len(self.dict_of_guild_id_to_current_role_message.keys()) == 0"
-            )
+            # logging.error(
+            #     "in extensions.roles, in add_role_to_message, len(self.dict_of_guild_id_to_current_role_message.keys()) == 0"
+            # )
             raise ValueError(
                 "len(self.dict_of_guild_id_to_current_role_message.keys()) == 0"
             )
@@ -116,7 +116,8 @@ class RolesExtension(Extension):
             if selected_role is not None:
                 await reaction.author.add_role(selected_role.id)
             else:
-                logging.warning("on_message_reaction_add(): role_name not recognized")
+                # logging.warning("on_message_reaction_add(): role_name not recognized")
+                raise ValueError("on_message_reaction_add(): role_name not recognized")
 
     @listen(MessageReactionRemove)
     async def on_message_reaction_remove(
@@ -144,9 +145,10 @@ class RolesExtension(Extension):
             if selected_role is not None:
                 await reaction.author.remove_role(selected_role.id)
             else:
-                logging.warning(
-                    "on_message_reaction_remove(): role_name not recognized"
-                )
+                # logging.warning(
+                #     "on_message_reaction_remove(): role_name not recognized"
+                # )
+                raise ValueError("on_message_reaction_add(): role_name not recognized")
 
 
 def setup(bot: CustomClient):

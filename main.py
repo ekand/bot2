@@ -23,9 +23,9 @@ test_guild_id = os.getenv("TEST_GUILD_ID")
 if __name__ == "__main__":
     # load the environmental vars from the .env file
     load_dotenv()
-
+    dir_name = os.path.dirname(__file__)
     logging.basicConfig(
-        filename="logs/interactions.log",
+        filename=dir_name + "/" + "logs/interactions.log",
         level=logging.INFO,
         format="%(asctime)s UTC || %(levelname)s || %(message)s",
     )
