@@ -82,7 +82,7 @@ resource "google_compute_instance_template" "default" {
     curl -sSL https://install.python-poetry.org | python3 -
     git clone https://github.com/ekand/bot2.git
     cd bot2
-
+    gcloud secrets versions access 1 --secret=dot-env > .env
     export BOT2_WORKING_DIR=$(pwd)
     export BOT2_PYTHON_FILE_NAME=main.py
     poetry shell

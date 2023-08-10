@@ -102,6 +102,7 @@ gcloud services enable \
     cloudresourcemanager.googleapis.com \
     compute.googleapis.com \
     sourcerepo.googleapis.com \
+    secretmanager.googleapis.com \
     --no-user-output-enabled \
     --quiet
 
