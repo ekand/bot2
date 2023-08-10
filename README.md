@@ -45,3 +45,4 @@ It is recommended that you set this up by running:
 
 ---
 updated public key on deploy server
+create username secret in repo
