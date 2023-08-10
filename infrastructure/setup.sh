@@ -59,7 +59,7 @@ else
     echo -e "  * ${RED}enable${NC} various GCP APIs"
     echo -e "  * make Cloud Build ${RED}editor${NC} of your project"
     echo -e "  * ${RED}execute${NC} Cloud Builds and Terraform plans to create"
-    echo -e "  * ${RED}4 VMs${NC}, ${RED}3 load balancers${NC}, ${RED}3 public IP addresses${NC}"
+    echo -e "  * ${RED}2 VMs${NC}, ${RED}3 load balancers${NC}, ${RED}3 public IP addresses${NC}"
     echo -e "  * incur ${RED}charges${NC} in your billing account as a result\n"
 fi
 
