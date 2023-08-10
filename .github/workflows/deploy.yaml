@@ -15,7 +15,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-        script: |
-            cd /home/${{ secrets.USERNAME }}/deploy_bot2_simply/bot2
-            git pull
-            sudo systemctl restart bot2.service
+          script: |
+              cd /home/${{ secrets.USERNAME }}/deploy_bot2_simply/bot2
+              git pull
+              sudo systemctl restart bot2.service
