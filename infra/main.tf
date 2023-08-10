@@ -50,7 +50,7 @@ variable "MIG_ACTIVE_COLOR" {
 
 # [START cloudbuild_splitter_instantiation]
 module "splitter-lb" {
-  source               = "./splitter"
+  source               = "splitter"
   project              = var.project
   ns                   = "${var.ns}splitter-"
   active_color         = var.MIG_ACTIVE_COLOR
@@ -61,7 +61,7 @@ module "splitter-lb" {
 
 # [START cloudbuild_blue_green_instantiation]
 module "blue" {
-  source                               = "./mig"
+  source                               = "mig"
   project                              = var.project
   app_version                          = var.MIG_VER_BLUE
   ns                                   = var.ns
@@ -72,7 +72,7 @@ module "blue" {
 }
 
 module "green" {
-  source                               = "./mig"
+  source                               = "mig"
   project                              = var.project
   app_version                          = var.MIG_VER_GREEN
   ns                                   = var.ns

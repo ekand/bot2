@@ -17,7 +17,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+#lib/
 lib64/
 parts/
 sdist/
@@ -136,3 +136,6 @@ dmypy.json
 # logs
 /logs/*
 !/logs/.exists
+
+
+#!lib/bash_utils.sh

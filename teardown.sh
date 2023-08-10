@@ -75,11 +75,11 @@ else
     echo -e "\n> Received user consent"
 fi
 
-echo "Deleting 'copy-of-mig-blue-green-disco' source repository"
-gcloud source repos delete \
-    --project "$PROJECT_ID" \
-    "copy-of-mig-blue-green-disco" \
-    --quiet || true
+#echo "Deleting 'copy-of-mig-blue-green-disco' source repository"
+#gcloud source repos delete \
+#    --project "$PROJECT_ID" \
+#    "copy-of-mig-blue-green-disco" \
+#    --quiet || true
 
 echo "Deleting Cloud Build triggers"
 gcloud builds triggers delete \

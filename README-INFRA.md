@@ -158,3 +158,24 @@ PUSH
 DONE
 Step #0 - "run-terraform-apply":
 ```
+
+more
+
+```commandline
+All done. Now you can:
+  * manually run 'apply' and 'destroy' triggers to manage deployment lifecycle
+  * commit change to 'infra/main.tfvars' and see 'apply' pipeline trigger automatically
+
+Few key links:
+  * Dashboard: https://console.cloud.google.com/home/dashboard?project=bluegreen8957398475
+  * Repo: https://source.cloud.google.com/bluegreen8957398475/copy-of-mig-blue-green-disco
+  * Cloud Build Triggers: https://console.cloud.google.com/cloud-build/triggers;region=global?project=bluegreen8957398475
+  * Cloud Build History: https://console.cloud.google.com/cloud-build/builds?project=bluegreen8957398475
+
+.............................
+
+COMPLETED!
+(bot2-py3.11) ➜  infrastructure git:(main) ✗ date
+Thu Aug 10 04:45:32 CDT 2023
+
+```
