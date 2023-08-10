@@ -144,7 +144,7 @@ steps:
         --name="destroy" \
         --repo="https://source.developers.google.com/p/$PROJECT_ID/r/github_ekand_bot2" \
         --branch="master" \
-        --build-config="infrastructure/pipelines/destroy.cloudbuild.yaml" \
+        --build-config="pipelines/destroy.cloudbuild.yaml" \
         --repo-type=CLOUD_SOURCE_REPOSITORIES \
         --quiet
 
@@ -154,7 +154,7 @@ steps:
         --name="apply" \
         --repo="github_ekand_bot2" \
         --branch-pattern="master" \
-        --build-config="infrastructure/pipelines/apply.cloudbuild.yaml" \
+        --build-config="pipelines/apply.cloudbuild.yaml" \
         --included-files="infra/main.tfvars" \
         --quiet
 
