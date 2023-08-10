@@ -19,7 +19,7 @@ class CustomClient(Client):
     @listen()
     async def on_startup(self):
         """Gets triggered on startup"""
-        print("super_secret_guild_id", self.super_secret_guild_id)
+        # print("super_secret_guild_id", self.super_secret_guild_id)
 
         self.logger.info(f"{os.getenv('PROJECT_NAME')} - Startup Finished!")
         self.logger.info(
