@@ -11,7 +11,7 @@ def load_extensions(bot: CustomClient):
 
     # go through all folders in the directory and load the extensions from all files
     # Note: files must end in .py
-    for root, dirs, files in os.walk("extensions"):
+    for root, dirs, files in os.walk(bot.python_project_root_dir + "/" + "extensions"):
         for file in files:
             if file.endswith(".py") and not file.startswith("__init__"):
                 file = file.removesuffix(".py")
