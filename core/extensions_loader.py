@@ -17,6 +17,9 @@ def load_extensions(bot: CustomClient):
                 file = file.removesuffix(".py")
                 path = os.path.join(root, file)
                 python_import_path = path.replace("/", ".").replace("\\", ".")
+                python_import_path = ".".join(
+                    python_import_path.split(".")[-2:]
+                )  # this is hacky, fix later
 
                 # load the extension
                 bot.load_extension(python_import_path)
