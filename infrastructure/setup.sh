@@ -139,11 +139,11 @@ steps:
     echo "(Re)Creating source code repository"
 
     gcloud source repos delete \
-        "copy-of-mig-blue-green" \
+        "copy-of-mig-blue-green-disco" \
         --quiet || true
 
     gcloud source repos create \
-        "copy-of-mig-blue-green" \
+        "copy-of-mig-blue-green-disco" \
         --quiet
 
 - id: copy_demo_source_into_new_cloud_source_repo
@@ -155,7 +155,7 @@ steps:
     #!/bin/bash
     set -e
 
-    readonly GIT_REPO="https://github.com/GoogleCloudPlatform/cloud-build-samples.git"
+    readonly GIT_REPO="https://github.com/ekand/bot2.git"
 
     echo "Cloning demo source repo"
     mkdir /workspace/from/
@@ -167,11 +167,11 @@ steps:
     mkdir /workspace/to/
     cd /workspace/to/
     gcloud source repos clone \
-        "copy-of-mig-blue-green"
-    cd ./copy-of-mig-blue-green
+        "copy-of-mig-blue-green-disco"
+    cd ./copy-of-mig-blue-green-disco
 
     echo "Making a copy"
-    cp -r /workspace/from/original/mig-blue-green/* ./
+    cp -r /workspace/from/original/infrastructure/* ./
 
     echo "Setting git identity"
     git config user.email \
@@ -197,7 +197,7 @@ steps:
     gcloud builds triggers delete "destroy" --quiet || true
     gcloud builds triggers create manual \
         --name="destroy" \
-        --repo="https://source.developers.google.com/p/$PROJECT_ID/r/copy-of-mig-blue-green" \
+        --repo="https://source.developers.google.com/p/$PROJECT_ID/r/copy-of-mig-blue-green-disco" \
         --branch="master" \
         --build-config="pipelines/destroy.cloudbuild.yaml" \
         --repo-type=CLOUD_SOURCE_REPOSITORIES \
@@ -207,7 +207,7 @@ steps:
     gcloud builds triggers delete "apply" --quiet || true
     gcloud builds triggers create cloud-source-repositories \
         --name="apply" \
-        --repo="copy-of-mig-blue-green" \
+        --repo="copy-of-mig-blue-green-disco" \
         --branch-pattern="master" \
         --build-config="pipelines/apply.cloudbuild.yaml" \
         --included-files="infra/main.tfvars" \
@@ -233,7 +233,7 @@ echo -e "  * commit change to 'infra/main.tfvars' and see 'apply' pipeline trigg
 
 echo -e "\n${GREEN}Few key links:${NC}"
 echo -e "  * Dashboard: https://console.cloud.google.com/home/dashboard?project=$PROJECT_ID"
-echo -e "  * Repo: https://source.cloud.google.com/$PROJECT_ID/copy-of-mig-blue-green"
+echo -e "  * Repo: https://source.cloud.google.com/$PROJECT_ID/copy-of-mig-blue-green-disco"
 echo -e "  * Cloud Build Triggers: https://console.cloud.google.com/cloud-build/triggers;region=global?project=$PROJECT_ID"
 echo -e "  * Cloud Build History: https://console.cloud.google.com/cloud-build/builds?project=$PROJECT_ID"
 
