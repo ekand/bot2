@@ -96,7 +96,7 @@ After=multi-user.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=${POETRY_ENV_EXECUTABLE} /home/${BOT2_WORKING_DIR}/${BOT2_PYTHON_FILE_NAME}
+ExecStart="$(poetry shell && which python) /home/bot2/main.py"
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/discord-bot2.service
     sudo systemctl restart discord-bot2
