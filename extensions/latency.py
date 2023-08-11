@@ -18,7 +18,7 @@ class Latency(Extension):
         name="latency", description="Get client latency"  # , scopes=[test_guild_id]
     )
     async def latency(self, ctx: InteractionContext):
-        await ctx.send(f"{(ctx.client.latency * 1000)}ms")
+        await ctx.send(f"{round((ctx.client.latency * 1000))}ms")
 
 
 def setup(bot: CustomClient):
