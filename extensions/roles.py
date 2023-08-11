@@ -76,27 +76,33 @@ class RolesExtension(Extension):
     )
     async def add_role_to_message(self, ctx: SlashContext, role_name: str, emoji: str):
         if role_name in DISALLOWED_ROLE_NAMES:
-            raise ValueError  # todo give an error or warning message to user
-        message_content = f"React with {emoji} to gain role {role_name}"
+            raise ValueError("role_name in DISALLOWED_ROLE_NAMES")
         search_criteria = {"guild_id": ctx.guild.id}
         sort_criteria = [("created_datetime", pymongo.DESCENDING)]
         most_recent_result = await self.bot.mongo_motor_collection.find_one(
             search_criteria, sort=sort_criteria
         )
         if most_recent_result is None:
-            logging.error("in add_role_to_message, most_recent_result is None")
             raise ValueError("in add_role_to_message, most_recent_result is None")
-        bot_message = ctx.guild.get_channel(
-            most_recent_result["channel_id"]
-        ).get_message(most_recent_result["current_role_message_id"])
+
+        channel = ctx.guild.get_channel(most_recent_result["channel_id"])
+        if channel is None:
+            channel = ctx.guild.fetch_channel(most_recent_result["channel_id"])
+        bot_message = channel.get_message(most_recent_result["current_role_message_id"])
         if bot_message is None:
-            raise ValueError("in add_role_to_message, bot_message is None")
-        content = bot_message.content
-        content += "\n" + message_content
+            bot_message = await channel.fetch_message(
+                most_recent_result["current_role_message_id"]
+            )
+        current_message_content = bot_message.content
+        content = (
+            current_message_content
+            + "\n"
+            + f"React with {emoji} to gain role {role_name}"
+        )
+
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
         await ctx.send(f"Role added", ephemeral=True)
-        return
 
     @listen(MessageReactionAdd)
     async def on_message_reaction_add(
