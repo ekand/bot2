@@ -20,12 +20,14 @@ from core.extensions_loader import load_extensions
 load_dotenv()
 LOCAL_DEV_MODE = True if os.getenv("LOCAL_DEV_MODE") == "yes" else False
 DEV_TEST_GUILD_ID = os.getenv("DEV_TEST_GUILD_ID")
+if LOCAL_DEV_MODE:
+    assert DEV_TEST_GUILD_ID, "DEV_TEST_GUILD_ID should not be empty or falsy"
+
 DELETE_UNUSED_APPLICATION_CMDS = (
     True if os.getenv("DELETE_UNUSED_APPLICATION_CMDS") == "yes" else False
 )
 
 
-assert DEV_TEST_GUILD_ID, "DEV_TEST_GUILD_ID should not be empty or falsy"
 if __name__ == "__main__":
     # load the environmental vars from the .env file
     load_dotenv()
