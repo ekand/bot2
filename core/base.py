@@ -1,6 +1,7 @@
 import logging
 import os
 
+import motor.motor_tornado
 from interactions import Client
 from interactions import listen
 from interactions import logger_name
@@ -12,6 +13,7 @@ class CustomClient(Client):
     def __init__(self, python_project_root_dir, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.python_project_root_dir = python_project_root_dir
+        self.mongo_motor_client = motor.motor_tornado.MotorClient()
 
     # you can use that logger in all your extensions
     logger = logging.getLogger(logger_name)

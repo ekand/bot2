@@ -11,6 +11,7 @@ orjson = "^3.6.7"
 discord-py-interactions= "^5.8.0"
 sentry-sdk = "^1.29.2"
 google-cloud-secret-manager = "^2.10.0"
+motor = "^3.2.0"
 
 [tool.poetry.dev-dependencies]
 
