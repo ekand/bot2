@@ -55,10 +55,8 @@ if __name__ == "__main__":
         sync_interactions=True,
         delete_unused_application_cmds=DELETE_UNUSED_APPLICATION_CMDS,
     )
-    if config.SENTRY_EXTENSION:
+    if os.getenv("USE_SENTRY") == "yes":
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))
-    elif config.SENTRY_MANUAL:
-        sentry_sdk.init(dsn=os.getenv("SENTRY_DSN"), traces_sample_rate=1.0)
 
     @listen(
         CommandError, disable_default_listeners=True
