@@ -29,7 +29,7 @@ class Ping(Extension):
         # logger.info("got a ping")
         await ctx.send(f"Pong!")
 
-    @slash_command(name="ping4", description="Ping...")  # , scopes=[test_guild_id]
+    @slash_command(name="ping5", description="Ping...")  # , scopes=[test_guild_id]
     async def ping4(self, ctx: InteractionContext):
         # logger.info("got a ping")
         await ctx.send(f"Pong!")

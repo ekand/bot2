@@ -18,9 +18,14 @@ from core.base import CustomClient
 from core.extensions_loader import load_extensions
 
 load_dotenv()
-test_guild_id = config.TEST_GUILD_ID
 LOCAL_DEV_MODE = True if os.getenv("LOCAL_DEV_MODE") == "yes" else False
+DEV_TEST_GUILD_ID = os.getenv("DEV_TEST_GUILD_ID")
+DELETE_UNUSED_APPLICATION_CMDS = (
+    True if os.getenv("DELETE_UNUSED_APPLICATION_CMDS") == "yes" else False
+)
 
+
+assert DEV_TEST_GUILD_ID, "DEV_TEST_GUILD_ID should not be empty or falsy"
 if __name__ == "__main__":
     # load the environmental vars from the .env file
     load_dotenv()
@@ -43,12 +48,12 @@ if __name__ == "__main__":
     bot = CustomClient(
         python_project_root_dir=dir_name,
         local_dev_mode=LOCAL_DEV_MODE,
-        debug_scope=[test_guild_id] if LOCAL_DEV_MODE else MISSING,
+        debug_scope=DEV_TEST_GUILD_ID if LOCAL_DEV_MODE else MISSING,
         intents=intents,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
         auto_defer=False,  # True  # automatically deferring interactions
         activity="interactions.py",  # the status message of the bot
         sync_interactions=True,
-        del_unused_app_cmd=True,
+        delete_unused_application_cmds=DELETE_UNUSED_APPLICATION_CMDS,
     )
     if config.SENTRY_EXTENSION:
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))
