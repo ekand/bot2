@@ -10,7 +10,7 @@ from interactions import logger_name
 class CustomClient(Client):
     """Subclass of interactions.Client with our own logger and on_startup event"""
 
-    def __init__(self, python_project_root_dir, *args, **kwargs):
+    def __init__(self, local_dev_mode, python_project_root_dir, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.python_project_root_dir = python_project_root_dir
         mongo_motor_client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -19,6 +19,7 @@ class CustomClient(Client):
         mongo_motor_db = mongo_motor_client["testDB"]
         mongo_motor_collection = mongo_motor_db["testCol"]
         self.mongo_motor_collection = mongo_motor_collection
+        self.local_dev_mode = local_dev_mode
 
     # you can use that logger in all your extensions
     logger = logging.getLogger(logger_name)

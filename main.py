@@ -8,6 +8,7 @@ from interactions import Client
 from interactions import Intents
 from interactions import IntervalTrigger
 from interactions import listen
+from interactions import MISSING
 from interactions import Task
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
@@ -17,8 +18,8 @@ from core.base import CustomClient
 from core.extensions_loader import load_extensions
 
 load_dotenv()
-test_guild_id = os.getenv("TEST_GUILD_ID")
-
+test_guild_id = config.TEST_GUILD_ID
+LOCAL_DEV_MODE = True if os.getenv("LOCAL_DEV_MODE") == "yes" else False
 
 if __name__ == "__main__":
     # load the environmental vars from the .env file
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         filename=dir_name + "/" + "logs/interactions.log",
         level=logging.INFO,
-        format="%(asctime)s UTC || %(levelname)s || %(message)s",
+        format="%(asctime)s UTC || %(levelname)s |||| %(message)s",
     )
     print("logging to logs/interactions.py")
     logging.info("logging to logs/interactions.py")
@@ -38,13 +39,16 @@ if __name__ == "__main__":
     intents.GUILD_MESSAGES = True
     intents.MESSAGE_CONTENT = True
     intents.MESSAGES = True
+
     bot = CustomClient(
+        python_project_root_dir=dir_name,
+        local_dev_mode=LOCAL_DEV_MODE,
+        debug_scope=[test_guild_id] if LOCAL_DEV_MODE else MISSING,
         intents=intents,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
         auto_defer=False,  # True  # automatically deferring interactions
-        activity="Another interactions.py bot",  # the status message of the bot
+        activity="interactions.py",  # the status message of the bot
         sync_interactions=True,
         del_unused_app_cmd=True,
-        python_project_root_dir=dir_name,
     )
     if config.SENTRY_EXTENSION:
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))

@@ -19,8 +19,18 @@ from core.base import CustomClient
 class Ping(Extension):
     bot: CustomClient
 
-    @slash_command(name="ping", description="Ping...")  # , scopes=[test_guild_id]
+    @slash_command(name="ping2", description="Ping...")  # , scopes=[test_guild_id]
     async def ping(self, ctx: InteractionContext):
+        # logger.info("got a ping")
+        await ctx.send(f"Pong!")
+
+    @slash_command(name="ping3", description="Ping...")  # , scopes=[test_guild_id]
+    async def ping3(self, ctx: InteractionContext):
+        # logger.info("got a ping")
+        await ctx.send(f"Pong!")
+
+    @slash_command(name="ping4", description="Ping...")  # , scopes=[test_guild_id]
+    async def ping4(self, ctx: InteractionContext):
         # logger.info("got a ping")
         await ctx.send(f"Pong!")
 
