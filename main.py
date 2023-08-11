@@ -35,7 +35,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         filename=dir_name + "/" + "logs/interactions.log",
         level=logging.INFO,
-        format="%(asctime)s UTC || %(levelname)s |||| %(message)s",
+        format="%(asctime)s UTC || %(levelname)s || %(message)s",
     )
     print("logging to logs/interactions.py")
     logging.info("logging to logs/interactions.py")
@@ -64,8 +64,7 @@ if __name__ == "__main__":
         CommandError, disable_default_listeners=True
     )  # tell the dispatcher that this replaces the default listener
     async def on_command_error(event: CommandError):
-        logging.exception(f"event.error: {event.error}, : ")
-        traceback.print_exception(event.error)
+        logging.error(event.error.__repr__())
         if not event.ctx.responded:
             await event.ctx.send("Something went wrong.")
 
