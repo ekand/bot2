@@ -1,7 +1,10 @@
+import datetime
 import logging
 import os
 
 import interactions
+import motor.motor_asyncio
+import pymongo
 from dotenv import load_dotenv
 from interactions import Extension
 from interactions import InteractionContext
@@ -14,7 +17,6 @@ from interactions.api.events import MessageReactionAdd
 from interactions.api.events import MessageReactionRemove
 
 from core.base import CustomClient
-
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")
@@ -32,10 +34,10 @@ DISALLOWED_ROLE_NAMES = ["admin"]
 class RolesExtension(Extension):
     bot: CustomClient
 
-    def __init__(self, bot):
-        self.dict_of_guild_id_to_current_role_message = (
-            {}
-        )  # current role message is a message object. # todo save to pickle
+    # def __init__(self,):
+    #     self.dict_of_guild_id_to_current_role_message = (
+    #         {}
+    #     )  # current role message is a message object. # todo save to pickle
 
     @slash_command(
         name="how-do-i-role-emoji",
@@ -53,9 +55,14 @@ class RolesExtension(Extension):
     )
     async def start_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
-        self.dict_of_guild_id_to_current_role_message[
-            ctx.guild.id
-        ] = current_role_message
+        document = {
+            "guild_id": ctx.guild.id,
+            "channel_id": ctx.channel.id,
+            "current_role_message_id": current_role_message.id,
+            "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
+        }
+        await self.bot.mongo_motor_collection.insert_one(document)
+        logging.info("tried to insert mongo document")
 
     @slash_command(name="add-role-to-message")
     @slash_option(
@@ -71,26 +78,25 @@ class RolesExtension(Extension):
         if role_name in DISALLOWED_ROLE_NAMES:
             raise ValueError  # todo give an error or warning message to user
         message_content = f"React with {emoji} to gain role {role_name}"
-        if len(self.dict_of_guild_id_to_current_role_message.keys()) == 0:
-            # logging.error(
-            #     "in extensions.roles, in add_role_to_message, len(self.dict_of_guild_id_to_current_role_message.keys()) == 0"
-            # )
-            raise ValueError(
-                "len(self.dict_of_guild_id_to_current_role_message.keys()) == 0"
-            )
-        current_role_message = self.dict_of_guild_id_to_current_role_message.get(
-            ctx.guild.id
+        search_criteria = {"guild_id": ctx.guild.id}
+        sort_criteria = [("created_datetime", pymongo.DESCENDING)]
+        most_recent_result = await self.bot.mongo_motor_collection.find_one(
+            search_criteria, sort=sort_criteria
         )
-        if current_role_message is None:
-            raise ValueError("current_role_message is None")
-        bot_message = current_role_message
+        if most_recent_result is None:
+            logging.error("in add_role_to_message, most_recent_result is None")
+            raise ValueError("in add_role_to_message, most_recent_result is None")
+        bot_message = ctx.guild.get_channel(
+            most_recent_result["channel_id"]
+        ).get_message(most_recent_result["current_role_message_id"])
+        if bot_message is None:
+            raise ValueError("in add_role_to_message, bot_message is None")
         content = bot_message.content
         content += "\n" + message_content
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
         await ctx.send(f"Role added", ephemeral=True)
         return
-        pass  # todo add rolename and string to temporary structure
 
     @listen(MessageReactionAdd)
     async def on_message_reaction_add(

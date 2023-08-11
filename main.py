@@ -34,8 +34,10 @@ if __name__ == "__main__":
 
     # create our bot instance
     # bot = Client(intents=Intents.DEFAULT, activity="Another interactions.py bot")
+    intents = Intents.DEFAULT
+    intents.GUILD_MESSAGES = True
     bot = CustomClient(
-        intents=Intents.DEFAULT,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
+        intents=intents,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
         auto_defer=False,  # True  # automatically deferring interactions
         activity="Another interactions.py bot",  # the status message of the bot
         sync_interactions=True,
