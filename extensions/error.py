@@ -15,12 +15,9 @@ class Error(Extension):
 
     @slash_command(name="make-error", description="Ping...")  # , scopes=[test_guild_id]
     async def ping(self, ctx: InteractionContext):
-        try:
-            s = 1 / 0
-            await ctx.send(f"Pong!")
-        except ZeroDivisionError as e:
-
-            await ctx.send("Something went wrong.")
+        await ctx.send("Trying the impossible...")
+        x = 1 / 0
+        await ctx.send("I did it!")
 
 
 def setup(bot: CustomClient):
