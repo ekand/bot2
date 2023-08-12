@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 
 from dotenv import load_dotenv
 from interactions import Intents
@@ -59,6 +60,7 @@ if __name__ == "__main__":
     )  # tell the dispatcher that this replaces the default listener
     async def on_command_error(event: CommandError):
         logging.error(event.error.__repr__())
+        logging.error(traceback.format_exc())
         if not event.ctx.responded:
             await event.ctx.send("Something went wrong.")
 
