@@ -1,15 +1,17 @@
 import logging
 import os
+from configparser import ConfigParser
+from pathlib import Path
 
+from core.base import CustomClient
+from core.extensions_loader import load_extensions
+from core.utils import basic_utils
 from dotenv import load_dotenv
 from interactions import Intents
 from interactions import listen
 from interactions import MISSING
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
-
-from core.base import CustomClient
-from core.extensions_loader import load_extensions
 
 load_dotenv()
 
@@ -22,18 +24,31 @@ DELETE_UNUSED_APPLICATION_CMDS = (
     True if os.getenv("DELETE_UNUSED_APPLICATION_CMDS") == "yes" else False
 )
 
-
 if __name__ == "__main__":
+    # get feature flags and dev settings from config.ini
+    feature_flags = basic_utils.get_feature_flags()
+    dev_settings = basic_utils.get_dev_config()
+    general_settings = basic_utils.get_general_settings()
+    dev_mode = True if general_settings["dev_mode"] == "1" else False
+    debug_scope = dev_settings["guild_id"] if dev_mode else MISSING
+    delete_unused_application_cmds = (
+        True if general_settings["delete_unused_application_cmds"] == "1" else False
+    )
+    sync_interactions = (
+        True if dev_mode or dev_settings["sync_interactions"] == "1" else False
+    )
+
     # load the environmental vars from the .env file
     load_dotenv()
-    dir_name = os.path.dirname(__file__)
+
+    # setup logging
     logging.basicConfig(
-        filename=dir_name + "/" + "logs/interactions.log",
+        filename="logs/interactions.log",
         level=logging.INFO,
         format="%(asctime)s UTC || %(levelname)s || %(message)s",
     )
-    print("logging to logs/interactions.py")
-    logging.info("logging to logs/interactions.py")
+    print("Logging to logs/interactions.py")
+    logging.info("Logging to logs/interactions.py")
 
     # create our bot instance
     intents = Intents.DEFAULT
@@ -42,16 +57,16 @@ if __name__ == "__main__":
     intents.MESSAGES = True
 
     bot = CustomClient(
-        python_project_root_dir=dir_name,
-        local_dev_mode=LOCAL_DEV_MODE,
-        debug_scope=DEV_TEST_GUILD_ID if LOCAL_DEV_MODE else MISSING,
+        dev_mode=dev_mode,
+        debug_scope=debug_scope,
         intents=intents,  # intents are what events we want to receive from discord, `DEFAULT` is usually fine
         auto_defer=False,  # True  # automatically deferring interactions
         activity="interactions.py",  # the status message of the bot
-        sync_interactions=True,
-        delete_unused_application_cmds=DELETE_UNUSED_APPLICATION_CMDS,
+        sync_interactions=sync_interactions,
+        delete_unused_application_cmds=delete_unused_application_cmds,
     )
-    if os.getenv("USE_SENTRY") == "yes":
+
+    if not dev_mode and general_settings["use_sentry"] == "1":
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))
 
     @listen(
@@ -63,7 +78,7 @@ if __name__ == "__main__":
             await event.ctx.send("Something went wrong.")
 
     # load the debug extension if that is wanted
-    if os.getenv("LOAD_DEBUG_COMMANDS") == "true":
+    if dev_mode and dev_settings["load_debug_commands"] == "1":
         DebugExtension(bot=bot)
 
     # load all extensions in the ./extensions folder

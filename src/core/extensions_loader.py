@@ -2,6 +2,7 @@ import logging
 import os
 
 from core.base import CustomClient
+from core.utils.basic_utils import get_feature_flags
 
 
 def load_extensions(bot: CustomClient):
@@ -11,15 +12,16 @@ def load_extensions(bot: CustomClient):
 
     # go through all folders in the directory and load the extensions from all files
     # Note: files must end in .py
-    for root, dirs, files in os.walk(bot.python_project_root_dir + "/" + "extensions"):
+    feature_flags = get_feature_flags()
+    for root, dirs, files in os.walk("src/extensions"):
         for file in files:
             if file.endswith(".py") and not file.startswith("__init__"):
-                file = file.removesuffix(".py")
-                path = os.path.join(root, file)
-                python_import_path = path.replace("/", ".").replace("\\", ".")
-                python_import_path = ".".join(
-                    python_import_path.split(".")[-2:]
-                )  # this is hacky, fix later
+                file_name = file.removesuffix(".py")
+                if feature_flags.get(file_name) != "1":
+                    continue
+                path = os.path.join(root, file_name)
+                python_import_path = path.replace("/", ".").replace("\\", ".")[4:]
+                # print(python_import_path)
 
                 # load the extension
                 bot.load_extension(python_import_path)
