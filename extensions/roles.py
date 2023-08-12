@@ -47,7 +47,7 @@ class RolesExtension(Extension):
             "current_role_message_id": current_role_message.id,
             "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
         }
-        await self.bot.mongo_motor_collection.insert_one(document)
+        await self.bot.mongo_motor_test_collection.insert_one(document)
         logging.info("tried to insert mongo document")
 
     @slash_command(name="add-role-to-message")
@@ -65,7 +65,7 @@ class RolesExtension(Extension):
             raise ValueError("role_name in DISALLOWED_ROLE_NAMES")
         search_criteria = {"guild_id": ctx.guild.id}
         sort_criteria = [("created_datetime", pymongo.DESCENDING)]
-        most_recent_result = await self.bot.mongo_motor_collection.find_one(
+        most_recent_result = await self.bot.mongo_motor_test_collection.find_one(
             search_criteria, sort=sort_criteria
         )
         if most_recent_result is None:

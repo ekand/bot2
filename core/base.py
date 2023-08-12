@@ -17,8 +17,9 @@ class CustomClient(Client):
             os.getenv("MONGO_URI"), tlsCertificateKeyFile=os.getenv("MONGO_CERT_PATH")
         )
         mongo_motor_db = mongo_motor_client["testDB"]
-        mongo_motor_collection = mongo_motor_db["testCol"]
-        self.mongo_motor_collection = mongo_motor_collection
+        self.mongo_motor_db = mongo_motor_db
+        mongo_motor_test_collection = mongo_motor_db["testCol"]
+        self.mongo_motor_test_collection = mongo_motor_test_collection
         self.local_dev_mode = local_dev_mode
 
     # you can use that logger in all your extensions
