@@ -23,67 +23,48 @@ from interactions import Task
 from core.base import CustomClient
 
 
+def check(component: Button) -> bool:
+    return component.ctx.author.startswith("a")
+
+
 class Ping(Extension):
     bot: CustomClient
 
     @slash_command(name="opt-in-server-to-birthday-events")
     async def opt_in_server_to_birthday_events(self, ctx: SlashContext):
+        await ctx.defer()
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
             "server_birthday_event_opt_in_collection"
         ]
         choices_list = []
-        for channel in ctx.guild.channels:
+        channels = ctx.guild.channels
+        for i, channel in enumerate(channels):
             # choices_list.append(str(channel.name) + '|' + str(channel.id))
             choices_list.append(
                 Button(
+                    custom_id=f"channel_choice_{i}",
                     style=ButtonStyle.GREEN,
-                    label="Click Me",
-                ),
+                    label=channel.name,
+                )
             )
         from asyncio import TimeoutError
 
-        components = Button(
-            custom_id="my_button_id",
-            style=ButtonStyle.GREEN,
-            label="Click Me",
+        await ctx.send("Look, Buttons!", components=choices_list)
+        used_component = await self.bot.wait_for_component(
+            components=choices_list, timeout=30
         )
+        custom_id = used_component.ctx.custom_id
+        channel = channels[int(custom_id.split("_")[-1])]
+        # print(used_component.custom_id)
 
-        message = await channel.send("Look a Button!", components=components)
+        document = {
+            "guild_id": ctx.guild.id,
+            "channel_id": channel.id,
+            "created_date": datetime.datetime.now(tz=datetime.timezone.utc),
+        }
+        await server_birthday_event_opt_in_collection.insert_one(document)
+        await used_component.ctx.send("added")
 
-        # define the check
-        def check(component: Button) -> bool:
-            return component.ctx.author.startswith("a")
-
-        try:
-            # you need to pass the component you want to listen for here
-            # you can also pass an ActionRow, or a list of ActionRows. Then a press on any component in there will be listened for
-            used_component = await bot.wait_for_component(
-                components=components, check=check, timeout=30
-            )
-
-        except TimeoutError:
-            print("Timed Out!")
-
-            components[0].components[0].disabled = True
-            await message.edit(components=components)
-
-        else:
-            await used_component.ctx.send("Your name starts with 'a'")
-        components: list[ActionRow] = [
-            ActionRow(
-                Button(
-                    style=ButtonStyle.GREEN,
-                    label="Click Me",
-                ),
-                Button(
-                    style=ButtonStyle.GREEN,
-                    label="Click Me Too",
-                ),
-            )
-        ]
-
-        my_modal = Modal(*choices_list, title="asfd")
-        await ctx.send_modal(modal=my_modal)
         # InputText(StringSelectMenu(
         #     *choices_list,
         #     placeholder="Which channel to use?",
