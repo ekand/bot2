@@ -1,3 +1,3 @@
 # Todo
 - [ ] Birthday Event extension
-- [ ] Add Mongo DB for persistence
+- [x] Add Mongo DB for persistence

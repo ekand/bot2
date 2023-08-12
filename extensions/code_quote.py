@@ -2,7 +2,6 @@ import logging
 import os
 import random
 
-import interactions.models.internal.tasks.task
 from dotenv import find_dotenv
 from dotenv import load_dotenv
 from github import Auth
@@ -11,7 +10,6 @@ from interactions import Extension
 from interactions import InteractionContext
 from interactions import IntervalTrigger
 from interactions import listen
-from interactions import logger_name
 from interactions import slash_command
 from interactions import Task
 
@@ -19,6 +17,38 @@ import config
 from core.base import CustomClient
 
 load_dotenv(find_dotenv())
+
+
+class CodeQuoteExtension(Extension):
+    bot: CustomClient
+
+    @slash_command(name="code-quote", description="Quote a line of code from our repos")
+    async def code_quote(self, ctx: InteractionContext):
+        await ctx.defer()
+        await ctx.send(
+            f"Here's a random line of code from one of our repositories.\n"
+            f"Will you be able to guess which repository?\n```\n{get_random_line()}```"
+        )
+
+    @Task.create(IntervalTrigger(minutes=77))
+    async def print_code_quote_every_seventy_seven(
+        self,
+    ):  # todo let any server opt in to these
+        logging.info("in print_code_quote_every_seventy_seven")
+        await self.bot.get_guild(config.TEST_GUILD_ID).get_channel(
+            config.TEST_BOT_CHANNEL
+        ).send(
+            f"Here's a random line of code from one of our repositories.\n"
+            f"Will you be able to guess which repository?\n```\n{get_random_line()}```"
+        )
+
+    @listen()
+    async def on_startup(self):
+        self.print_code_quote_every_seventy_seven.start()
+
+
+def setup(bot: CustomClient):
+    CodeQuoteExtension(bot)
 
 
 def get_random_line():
@@ -51,32 +81,3 @@ def get_random_line():
     while not chosen_line.strip():
         chosen_line = random.choice(lines)
     return chosen_line
-
-
-class CodeQuoteExtension(Extension):
-    bot: CustomClient
-
-    @slash_command(name="code-quote", description="Quote a line of code from our repos")
-    async def code_quote(self, ctx: InteractionContext):
-        await ctx.defer()
-        await ctx.send(
-            f"Here's a random line of code from one of our repositories.\n"
-            f"Will you be able to guess which repository?\n```\n{get_random_line()}```"
-        )
-
-    @Task.create(IntervalTrigger(minutes=77))
-    async def print_code_quote_every_seventy_seven(self):
-        await self.bot.get_guild(config.TEST_GUILD_ID).get_channel(
-            config.TEST_BOT_CHANNEL
-        ).send(
-            f"Here's a random line of code from one of our repositories.\n"
-            f"Will you be able to guess which repository?\n```\n{get_random_line()}```"
-        )
-
-    @listen()
-    async def on_startup(self):
-        self.print_code_quote_every_seventy_seven.start()
-
-
-def setup(bot: CustomClient):
-    CodeQuoteExtension(bot)

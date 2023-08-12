@@ -3,7 +3,6 @@ import logging
 import os
 
 import interactions
-import motor.motor_asyncio
 import pymongo
 from dotenv import load_dotenv
 from interactions import Extension
@@ -24,20 +23,8 @@ test_guild_id = os.getenv("TEST_GUILD_ID")
 DISALLOWED_ROLE_NAMES = ["admin"]
 
 
-# logging.basicConfig(
-#     filename="logs/interactions.log",
-#     level=logging.INFO,
-#     format="%(asctime)s UTC || %(levelname)s || %(message)s",
-# )
-
-
 class RolesExtension(Extension):
     bot: CustomClient
-
-    # def __init__(self,):
-    #     self.dict_of_guild_id_to_current_role_message = (
-    #         {}
-    #     )  # current role message is a message object. # todo save to pickle
 
     @slash_command(
         name="how-do-i-role-emoji",
@@ -51,7 +38,6 @@ class RolesExtension(Extension):
     @slash_command(
         name="start-role-emoji-message",
         description="Create Role Assigning Message",
-        #  scopes=[test_guild_id],
     )
     async def start_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
@@ -128,7 +114,6 @@ class RolesExtension(Extension):
             if selected_role is not None:
                 await reaction.author.add_role(selected_role.id)
             else:
-                # logging.warning("on_message_reaction_add(): role_name not recognized")
                 raise ValueError("on_message_reaction_add(): role_name not recognized")
 
     @listen(MessageReactionRemove)
@@ -139,8 +124,6 @@ class RolesExtension(Extension):
             return
         if reaction.message.author.id != reaction.bot.user.id:
             return
-        role_name = reaction.message.content.split()[-1]
-        selected_role = None
         for role_name, emoji in get_role_and_emoji_from_message(
             reaction.message.content
         ):
@@ -157,9 +140,6 @@ class RolesExtension(Extension):
             if selected_role is not None:
                 await reaction.author.remove_role(selected_role.id)
             else:
-                # logging.warning(
-                #     "on_message_reaction_remove(): role_name not recognized"
-                # )
                 raise ValueError("on_message_reaction_add(): role_name not recognized")
 
 

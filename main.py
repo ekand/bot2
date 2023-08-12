@@ -1,23 +1,18 @@
 import logging
 import os
-import traceback
 
-import sentry_sdk
 from dotenv import load_dotenv
-from interactions import Client
 from interactions import Intents
-from interactions import IntervalTrigger
 from interactions import listen
 from interactions import MISSING
-from interactions import Task
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
 
-import config
 from core.base import CustomClient
 from core.extensions_loader import load_extensions
 
 load_dotenv()
+
 LOCAL_DEV_MODE = True if os.getenv("LOCAL_DEV_MODE") == "yes" else False
 DEV_TEST_GUILD_ID = os.getenv("DEV_TEST_GUILD_ID")
 if LOCAL_DEV_MODE:
@@ -41,7 +36,6 @@ if __name__ == "__main__":
     logging.info("logging to logs/interactions.py")
 
     # create our bot instance
-    # bot = Client(intents=Intents.DEFAULT, activity="Another interactions.py bot")
     intents = Intents.DEFAULT
     intents.GUILD_MESSAGES = True
     intents.MESSAGE_CONTENT = True

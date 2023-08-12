@@ -22,14 +22,10 @@ class CustomClient(Client):
         self.local_dev_mode = local_dev_mode
 
     # you can use that logger in all your extensions
-    logger = logging.getLogger(logger_name)
+    # logger = logging.getLogger(logger_name)
 
     @listen()
     async def on_startup(self):
         """Gets triggered on startup"""
-        # print("super_secret_guild_id", self.super_secret_guild_id)
 
         self.logger.info(f"{os.getenv('PROJECT_NAME')} - Startup Finished!")
-        self.logger.info(
-            "Note: Discord needs up to an hour to load your global commands / context menus. They may not appear immediately\n"
-        )
