@@ -35,7 +35,13 @@ if __name__ == "__main__":
         True if general_settings["delete_unused_application_cmds"] == "1" else False
     )
     sync_interactions = (
-        True if dev_mode and dev_settings["sync_interactions"] == "1" else False
+        True
+        if (
+            general_settings["sync_interactions"] == "1"
+            or dev_mode
+            and dev_settings["sync_interactions"] == "1"
+        )
+        else False
     )
 
     # load the environmental vars from the .env file
