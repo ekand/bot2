@@ -51,3 +51,4 @@ create username secret in repo
 # Todo
 - [ ] Birthday Event extension
 - [x] Add Mongo DB for persistence
+- [ ] Meeting Scheduler
