@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import traceback
 
 import aiohttp
 import interactions.models
@@ -12,6 +13,7 @@ from interactions import Extension
 from interactions import InputText
 from interactions import InteractionContext
 from interactions import IntervalTrigger
+from interactions import listen
 from interactions import Modal
 from interactions import OptionType
 from interactions import ShortText
@@ -25,14 +27,10 @@ from interactions import Task
 from core.base import CustomClient
 
 
-def check(component: Button) -> bool:
-    return component.ctx.author.startswith("a")
-
-
-class Ping(Extension):
+class BirthdayEvents(Extension):
     bot: CustomClient
 
-    @slash_command(name="opt-out-server-from-birthday-events")
+    @slash_command(name="opt-out-server-events")
     async def opt_out_server_from_birthday_events(self, ctx: SlashContext):
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
             "server_birthday_event_opt_in_collection"
@@ -126,7 +124,7 @@ class Ping(Extension):
         description="Tell the bot your birthday and it'll create a special event all for you.",
     )
     @slash_option(
-        name="month",
+        name="month_option",
         description="Month Number",
         required=True,
         opt_type=OptionType.INTEGER,
@@ -134,7 +132,7 @@ class Ping(Extension):
         max_value=12,
     )
     @slash_option(
-        name="day",
+        name="day_option",
         description="Day Number",
         required=True,
         opt_type=OptionType.INTEGER,
@@ -142,21 +140,24 @@ class Ping(Extension):
         max_value=31,
     )
     async def register_birthday(
-        self, ctx: SlashContext, month: int, day: int
+        self, ctx: SlashContext, month_option, day_option
     ):  # , birthday_type: str
         await ctx.defer()
         mongo_motor_birthday_collection = self.bot.mongo_motor_db["birthdayCollection"]
         document = {
             "guild_id": ctx.guild.id,
             "member_id": ctx.member.id,
-            "month": month,
-            "day": day,
-            "last_event_datetime": datetime.datetime(year=2001),
-            "next_event_datetime": datetime.datetime(year=2023, month=month, day=day),
+            "month": month_option,
+            "day": day_option,
+            "last_event_datetime": datetime.datetime(year=2001, month=1, day=1),
+            "next_event_datetime": datetime.datetime(
+                year=2023, month=month_option, day=day_option
+            ),
             "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
         }
         await mongo_motor_birthday_collection.insert_one(document)
         logging.info("tried to insert mongo document")
+        await ctx.send("added.")
 
     #     @slash_option(
     #         name="birthday_type",
@@ -198,8 +199,10 @@ class Ping(Extension):
     #     "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
     # }
 
-    @Task.create(IntervalTrigger(hours=11))
+    # @Task.create(IntervalTrigger(hours=11))
+    @Task.create(IntervalTrigger(seconds=5))
     async def create_birthday_events(self):
+        logging.info("In create_birthday_events")
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
             "server_birthday_event_opt_in_collection"
         ]
@@ -207,20 +210,28 @@ class Ping(Extension):
         for guild in self.bot.guilds:
             search_criteria = {"guild_id": guild.id}
             sort_criteria = [("created_datetime", pymongo.DESCENDING)]
-            opt_in_document = server_birthday_event_opt_in_collection.find_one(
+            opt_in_document = await server_birthday_event_opt_in_collection.find_one(
                 search_criteria, sort=sort_criteria
             )
+            if opt_in_document is None:
+                continue
             if not opt_in_document["opt_in"]:
                 continue
+            seen_users = set()
             async for birthday_document in mongo_motor_birthday_collection.find(
-                {"guild_id": {"$eq": guild.id}}
+                {"guild_id": {"$eq": guild.id}},
+                sort=[("created_datetime", pymongo.DESCENDING)],
             ):
+                member_id = birthday_document["member_id"]
+                if member_id in seen_users:
+                    continue
+                seen_users.add(member_id)
                 event_date = datetime.datetime(
                     year=2023,
                     month=birthday_document["month"],
                     day=birthday_document["day"],
                 )
-                now = datetime.datetime.now(tz=datetime.timezone.utc)
+                now = datetime.datetime.now()
                 if (event_date - now).seconds > 0 and (event_date - now).days < 1:
                     if (
                         (event_date - birthday_document["last_event_datetime"]).days
@@ -231,14 +242,24 @@ class Ping(Extension):
                         await self.schedule_discord_event(
                             guild, birthday_document, opt_in_document
                         )
+                _id = birthday_document["_id"]
+                birthday_document["last_event_datetime"] = event_date
+                mongo_motor_birthday_collection.replace_one(
+                    {"_id": _id}, birthday_document
+                )
+
+    # define a function to start the task on startup
+    @listen()
+    async def on_startup(self):
+        self.create_birthday_events.start()
 
     async def schedule_discord_event(
         self, guild: interactions.models.Guild, birthday_document, opt_in_document
     ):
         member = guild.get_member(birthday_document["member_id"])
         if member is None:
-            member = await guild.get_member(birthday_document["member_id"])
-        member_name = member.name
+            member = await guild.fetch_member(birthday_document["member_id"])
+        member_name = member.display_name
         next_event_datetime: datetime.datetime = birthday_document[
             "next_event_datetime"
         ]
@@ -246,14 +267,18 @@ class Ping(Extension):
         event_end_time_str = (
             next_event_datetime + datetime.timedelta(hours=1)
         ).strftime("%Y-%m-%dT%H:%M:%S")
-        await self.create_guild_event(
-            guild_id=str(guild.id),
+
+        #     async def create_guild_event_2(self, guild_id: int, event_name: str,
+        #                                  event_description: str, event_start_time: str, event_end_time: str,
+        #                                  event_metadata: dict, channel_id: int = None):
+
+        await self.create_guild_event_2(
+            guild_id=int(guild.id),
             event_name=f"{member_name}'s Birthday Party",
             event_description="Happy Birthday!",
             event_start_time=next_event_datetime_str,
             event_end_time=event_end_time_str,
             event_metadata={},
-            event_privacy_level=2,
             channel_id=opt_in_document["channel_id"],
         )
 
@@ -301,6 +326,72 @@ class Ping(Extension):
             finally:
                 await session.close()
 
+    async def create_guild_event_2(
+        self,
+        guild_id: int,
+        event_name: str,
+        event_description: str,
+        event_start_time: str,
+        event_end_time: str,
+        event_metadata: dict,
+        channel_id: int = None,
+    ):
+        """Creates a guild event using the supplied arguments.
+        The expected event_metadata format is event_metadata={"location": "YOUR_LOCATION_NAME"}
+        The required time format is %Y-%m-%dT%H:%M:%S aka ISO8601
+
+        Args:
+            guild_id (str): Guild id in endpoint
+            event_name (str): Name of event
+            event_description (str): Description of event
+            event_start_time (str): Start timestamp
+            event_end_time (str): End timestamp
+            event_metadata (dict): External location data
+            channel_id (int, optional): Id of voice channel. Defaults to None.
+        Raises:
+            ValueError: Cannot have both (event_metadata) and (channel_id)
+            at the same time.
+        """
+        if channel_id and event_metadata:
+            raise ValueError(
+                f"If event_metadata is set, channel_id must be set to None. And vice versa."
+            )
+        API_URL: str = "https://discord.com/api/v10"
+        ENDPOINT_URL = f"{API_URL}/guilds/{guild_id}/scheduled-events"
+        entity_type = 2
+
+        event_data = json.dumps(
+            {
+                "name": event_name,
+                "privacy_level": 2,
+                "scheduled_start_time": event_start_time,
+                "scheduled_end_time": event_end_time,
+                "description": event_description,
+                "channel_id": channel_id,
+                "entity_metadata": event_metadata,
+                "entity_type": entity_type,
+            }
+        )
+        BOT_AUTH_HEADER = f"https://discord.com/oauth2/authorize?client_id={1139488619405529159}"  # todo change me
+        AUTH_HEADERS: dict = {
+            "Authorization": f"Bot {self.bot.token}",
+            "User-Agent": f"DiscordBot ({BOT_AUTH_HEADER}) Python/3.9 aiohttp/3.7.4",
+            "Content-Type": "application/json",
+        }
+        async with aiohttp.ClientSession(headers=AUTH_HEADERS) as session:
+            try:
+                async with session.post(ENDPOINT_URL, data=event_data) as response:
+                    response.raise_for_status()
+                    assert response.status == 200
+                    logging.info(f"Post success: to {ENDPOINT_URL}")
+            except Exception as e:
+                logging.warning(f"Post error: to {ENDPOINT_URL} as {e}")
+                await session.close()
+                return
+
+            await session.close()
+            return response
+
 
 def setup(bot: CustomClient):
-    Ping(bot)
+    BirthdayEvents(bot)
