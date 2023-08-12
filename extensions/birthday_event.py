@@ -3,6 +3,8 @@ import json
 import logging
 
 import aiohttp
+import interactions.models
+import pymongo
 from interactions import ActionRow
 from interactions import Button
 from interactions import ButtonStyle
@@ -30,6 +32,20 @@ def check(component: Button) -> bool:
 class Ping(Extension):
     bot: CustomClient
 
+    @slash_command(name="opt-out-server-from-birthday-events")
+    async def opt_out_server_from_birthday_events(self, ctx: SlashContext):
+        server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
+            "server_birthday_event_opt_in_collection"
+        ]
+        document = {
+            "guild_id": ctx.guild.id,
+            "channel_id": 0,
+            "created_date": datetime.datetime.now(tz=datetime.timezone.utc),
+            "opt_in": False,
+        }
+        await server_birthday_event_opt_in_collection.insert_one(document)
+        await ctx.send("opted_out")
+
     @slash_command(name="opt-in-server-to-birthday-events")
     async def opt_in_server_to_birthday_events(self, ctx: SlashContext):
         await ctx.defer()
@@ -38,32 +54,35 @@ class Ping(Extension):
         ]
         choices_list = []
         channels = ctx.guild.channels
-        for i, channel in enumerate(channels):
-            # choices_list.append(str(channel.name) + '|' + str(channel.id))
+        for i, birthday_channel in enumerate(channels):
             choices_list.append(
                 Button(
                     custom_id=f"channel_choice_{i}",
                     style=ButtonStyle.GREEN,
-                    label=channel.name,
+                    label=birthday_channel.name,
                 )
             )
         from asyncio import TimeoutError
 
-        await ctx.send("Look, Buttons!", components=choices_list)
+        await ctx.send(
+            "Please choose a channel for the events.", components=choices_list
+        )
         used_component = await self.bot.wait_for_component(
             components=choices_list, timeout=30
         )
         custom_id = used_component.ctx.custom_id
-        channel = channels[int(custom_id.split("_")[-1])]
-        # print(used_component.custom_id)
+        birthday_channel = channels[int(custom_id.split("_")[-1])]
 
         document = {
             "guild_id": ctx.guild.id,
-            "channel_id": channel.id,
+            "channel_id": birthday_channel.id,
             "created_date": datetime.datetime.now(tz=datetime.timezone.utc),
+            "opt_in": True,
         }
         await server_birthday_event_opt_in_collection.insert_one(document)
-        await used_component.ctx.send("added")
+        await used_component.ctx.send(
+            f"opted in. Events will happen in channel: {birthday_channel.name}"
+        )
 
         # InputText(StringSelectMenu(
         #     *choices_list,
@@ -104,7 +123,7 @@ class Ping(Extension):
 
     @slash_command(
         name="register-birthday",
-        description="Tell the bot your birthday and it'll create a special event all for you",
+        description="Tell the bot your birthday and it'll create a special event all for you.",
     )
     @slash_option(
         name="month",
@@ -181,22 +200,62 @@ class Ping(Extension):
 
     @Task.create(IntervalTrigger(hours=11))
     async def create_birthday_events(self):
+        server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
+            "server_birthday_event_opt_in_collection"
+        ]
         mongo_motor_birthday_collection = self.bot.mongo_motor_db["birthdayCollection"]
         for guild in self.bot.guilds:
-            async for document in mongo_motor_birthday_collection.find(
+            search_criteria = {"guild_id": guild.id}
+            sort_criteria = [("created_datetime", pymongo.DESCENDING)]
+            opt_in_document = server_birthday_event_opt_in_collection.find_one(
+                search_criteria, sort=sort_criteria
+            )
+            if not opt_in_document["opt_in"]:
+                continue
+            async for birthday_document in mongo_motor_birthday_collection.find(
                 {"guild_id": {"$eq": guild.id}}
             ):
                 event_date = datetime.datetime(
-                    year=2023, month=document["month"], day=document["day"]
+                    year=2023,
+                    month=birthday_document["month"],
+                    day=birthday_document["day"],
                 )
                 now = datetime.datetime.now(tz=datetime.timezone.utc)
                 if (event_date - now).seconds > 0 and (event_date - now).days < 1:
                     if (
-                        (event_date - document["last_event_datetime"]).days > 364
+                        (event_date - birthday_document["last_event_datetime"]).days
+                        > 364
                         and (event_date - now).seconds > 0
                         and (event_date - now).days < 5
                     ):
-                        self.schedule_discord_event(guild, document)
+                        await self.schedule_discord_event(
+                            guild, birthday_document, opt_in_document
+                        )
+
+    async def schedule_discord_event(
+        self, guild: interactions.models.Guild, birthday_document, opt_in_document
+    ):
+        member = guild.get_member(birthday_document["member_id"])
+        if member is None:
+            member = await guild.get_member(birthday_document["member_id"])
+        member_name = member.name
+        next_event_datetime: datetime.datetime = birthday_document[
+            "next_event_datetime"
+        ]
+        next_event_datetime_str = next_event_datetime.strftime("%Y-%m-%dT%H:%M:%S")
+        event_end_time_str = (
+            next_event_datetime + datetime.timedelta(hours=1)
+        ).strftime("%Y-%m-%dT%H:%M:%S")
+        await self.create_guild_event(
+            guild_id=str(guild.id),
+            event_name=f"{member_name}'s Birthday Party",
+            event_description="Happy Birthday!",
+            event_start_time=next_event_datetime_str,
+            event_end_time=event_end_time_str,
+            event_metadata={},
+            event_privacy_level=2,
+            channel_id=opt_in_document["channel_id"],
+        )
 
     async def create_guild_event(
         self,
@@ -209,10 +268,16 @@ class Ping(Extension):
         event_privacy_level=2,
         channel_id=None,
     ) -> None:
+        auth_headers = {
+            "Authorization": f"Bot {self.bot.token}",
+            "User-Agent": "DiscordBot (https://your.bot/url) Python/3.9 aiohttp/3.8.1",
+            "Content-Type": "application/json",
+        }
+        base_api_url = "https://discord.com/api"
         """Creates a guild event using the supplied arguments
         The expected event_metadata format is event_metadata={'location': 'YOUR_LOCATION_NAME'}
         The required time format is %Y-%m-%dT%H:%M:%S"""
-        event_create_url = f"{self.base_api_url}/guilds/{guild_id}/scheduled-events"
+        event_create_url = f"{base_api_url}/guilds/{guild_id}/scheduled-events"
         event_data = json.dumps(
             {
                 "name": event_name,
@@ -226,30 +291,15 @@ class Ping(Extension):
             }
         )
 
-        async with aiohttp.ClientSession(headers=self.auth_headers) as session:
+        async with aiohttp.ClientSession(headers=auth_headers) as session:
             try:
                 async with session.post(event_create_url, data=event_data) as response:
                     response.raise_for_status()
                     assert response.status == 200
             except Exception as e:
-                print(f"EXCEPTION: {e}")
+                logging.error(f"EXCEPTION: {e}")
             finally:
                 await session.close()
-
-        #
-        # async def do_find():
-        #     c = db.test_collection
-        #     async for document in c.find({'i': {'$lt': 2}}):
-        #         pprint.pprint(document)
-        # await self.bot.get_guild(config.TEST_GUILD_ID).get_channel(
-        #     config.TEST_BOT_CHANNEL
-        # ).send("it's been 33 minutes")
-        # print("It's been 33 minutes!")
-
-    # define a function to start the task on startup
-    # @listen()
-    # async def on_startup(self):
-    #     self.print_every_thirty_three.start()
 
 
 def setup(bot: CustomClient):
