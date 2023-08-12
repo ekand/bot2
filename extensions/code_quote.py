@@ -52,6 +52,9 @@ def setup(bot: CustomClient):
 
 
 def get_random_line():
+    """
+    Fetches a random line of code from the GitHub.
+    """
     auth = Auth.Token(os.getenv("GITHUB_TOKEN"))
 
     g = Github(auth=auth)
