@@ -1,19 +1,16 @@
+import logging
 import os
 
-import logging
 import interactions
-
 from dotenv import load_dotenv
-
-from interactions import (
-    Extension,
-    slash_command,
-    slash_option,
-    OptionType,
-    SlashContext,
-    listen,
-)
-from interactions.api.events import MessageReactionAdd, MessageReactionRemove
+from interactions import Extension
+from interactions import listen
+from interactions import OptionType
+from interactions import slash_command
+from interactions import slash_option
+from interactions import SlashContext
+from interactions.api.events import MessageReactionAdd
+from interactions.api.events import MessageReactionRemove
 
 from core.base import CustomClient
 

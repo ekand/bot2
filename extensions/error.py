@@ -5,13 +5,14 @@ from interactions import slash_command
 from core.base import CustomClient
 
 
-class Ping(Extension):
+class Error(Extension):
     bot: CustomClient
 
-    @slash_command(name="ping", description="Ping...")
+    @slash_command(name="make-error", description="Ping...")
     async def ping(self, ctx: InteractionContext):
-        await ctx.send(f"Pong!")
+        x = 1 / 0
+        await ctx.send("I did it!")
 
 
 def setup(bot: CustomClient):
-    Ping(bot)
+    Error(bot)

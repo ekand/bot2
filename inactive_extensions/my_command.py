@@ -1,20 +1,19 @@
-from core.base import CustomClient
+import os
 
-from interactions import (
-    Button,
-    ButtonStyle,
-    ComponentContext,
-    Embed,
-    Extension,
-    InteractionContext,
-    component_callback,
-    slash_command,
-)
+from dotenv import load_dotenv
+from interactions import Button
+from interactions import ButtonStyle
+from interactions import component_callback
+from interactions import ComponentContext
+from interactions import Embed
+from interactions import Extension
+from interactions import InteractionContext
+from interactions import slash_command
+
+from core.base import CustomClient
 
 # from interactions.something import ButtonStyles
 # create a recurring task
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")
@@ -24,7 +23,9 @@ class CommandExtension(Extension):
     bot: CustomClient
 
     @slash_command(
-        name="hello_world", description="My first command :)", scopes=[test_guild_id]
+        name="hello_world_new",
+        description="My first command :)",
+        # scopes=[test_guild_id],
     )
     async def my_command(self, ctx: InteractionContext):
         """Says hello to the world"""
