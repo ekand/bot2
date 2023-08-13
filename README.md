@@ -51,5 +51,6 @@ create username secret in repo
 - [ ] Birthday Event extension
 - [x] Add Mongo DB for persistence
 - [ ] Meeting Scheduler
+- [ ] create event while creating the object
 
 Deploy failed, as it should have, when git pull failed.
