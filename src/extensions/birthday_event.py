@@ -12,7 +12,9 @@ from interactions import Extension
 from interactions import IntervalTrigger
 from interactions import listen
 from interactions import OptionType
+from interactions import Permissions
 from interactions import slash_command
+from interactions import slash_default_member_permission
 from interactions import slash_option
 from interactions import SlashCommandChoice
 from interactions import SlashContext
@@ -23,6 +25,7 @@ class BirthdayEvents(Extension):
     bot: CustomClient
 
     @slash_command(name="opt-out-from-birthday-events")
+    @slash_default_member_permission(Permissions.MANAGE_EVENTS)
     async def opt_out_server_from_birthday_events(self, ctx: SlashContext):
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
             "server_birthday_event_opt_in_collection"
@@ -37,6 +40,7 @@ class BirthdayEvents(Extension):
         await ctx.send("opted_out")
 
     @slash_command(name="opt-in-server-to-birthday-events")
+    @slash_default_member_permission(Permissions.MANAGE_EVENTS)
     async def opt_in_server_to_birthday_events(self, ctx: SlashContext):
         await ctx.defer()
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
