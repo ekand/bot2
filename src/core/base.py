@@ -24,9 +24,6 @@ class CustomClient(Client):
         mongo_motor_client = get_mongo_motor_client()
         mongo_motor_db = mongo_motor_client["testDB"]
         self.mongo_motor_db = mongo_motor_db
-        self.mongo_motor_collection = mongo_motor_db[
-            "testCol"
-        ]  # todo remove this when possible
 
     @listen()
     async def on_startup(self):

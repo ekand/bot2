@@ -72,26 +72,34 @@ class RolesExtension(Extension):
             raise ValueError("role_name not in guild roles")
         search_criteria = {"guild_id": ctx.guild.id}
         sort_criteria = [("created_datetime", pymongo.DESCENDING)]
-        most_recent_result = await self.bot.mongo_motor_collection.find_one(
-            search_criteria, sort=sort_criteria
-        )
-        if most_recent_result is None:
+        most_recent_message_document = await self.bot.mongo_motor_db[
+            "role_reaction_message_collection"
+        ].find_one(search_criteria, sort=sort_criteria)
+        if most_recent_message_document is None:
             raise ValueError("in add_role_to_message, most_recent_result is None")
-
-        channel = ctx.guild.get_channel(most_recent_result["channel_id"])
+        role_reactions_collection = self.bot.mongo_motor_db["role_reactions_collection"]
+        role_reaction_document = {
+            "role_name": role_name,
+            "emoji": emoji,
+            "guild_id": most_recent_message_document["guild_id"],
+            "channel_id": most_recent_message_document["channel_id"],
+            "message_id": most_recent_message_document["current_role_message_id"],
+        }
+        role_reactions_collection.insert_one(role_reaction_document)
+        channel = ctx.guild.get_channel(most_recent_message_document["channel_id"])
         if channel is None:
-            channel = ctx.guild.fetch_channel(most_recent_result["channel_id"])
-        bot_message = channel.get_message(most_recent_result["current_role_message_id"])
+            channel = ctx.guild.fetch_channel(
+                most_recent_message_document["channel_id"]
+            )
+        bot_message = channel.get_message(
+            most_recent_message_document["current_role_message_id"]
+        )
         if bot_message is None:
             bot_message = await channel.fetch_message(
-                most_recent_result["current_role_message_id"]
+                most_recent_message_document["current_role_message_id"]
             )
-        current_message_content = bot_message.content
-        content = (
-            current_message_content
-            + "\n"
-            + f"React with {emoji} to gain role {role_name}"
-        )
+
+        content = self.generate_reaction_message_content_from_mongo_data()
 
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
@@ -105,6 +113,7 @@ class RolesExtension(Extension):
             return
         if reaction.message.author.id != reaction.bot.user.id:
             return
+        role_names_and_emojis: [(str, str)] = self.get_mongo_stuff(reaction)
         for role_name, emoji in self.get_role_and_emoji_from_mongo(reaction):
             if role_name is None:
                 continue
@@ -156,19 +165,20 @@ class RolesExtension(Extension):
         ]
 
         search_criteria = {
-            "guild_id": guild_id,
-            "channel_id": channel_id,
             "current_role_message_id": message_id,
         }
         sort_criteria = [("created_datetime", pymongo.DESCENDING)]
-        role_reaction_message_collection.find_one(search_criteria, sort=sort_criteria)
+        role_reaction_document = role_reaction_message_collection.find_one(
+            search_criteria, sort=sort_criteria
+        )
+        role_reaction_document["asdf"]
 
-        document = {
-            "guild_id": ctx.guild.id,
-            "channel_id": ctx.channel.id,
-            "current_role_message_id": current_role_message.id,
-            "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
-        }
+    def generate_reaction_message_content_from_mongo_data(self):
+        return "fake message content"
+
+    def get_mongo_stuff(self, reaction):
+        message_id = reaction.message.id
+        self.bot.mongo_motor_db[""]
 
         pass
 
@@ -183,7 +193,7 @@ def get_role_and_emoji_from_message(content: str):
     """Takes content from the role emoji reaction message, which can look like the following:
     Role Emoji Reaction Message
     React with 🌞 to gain role new-role
-    React with 👒 to gain role other-role
+    React with 😎 to gain role other-role
     """
     lines = content.split("\n")
 
