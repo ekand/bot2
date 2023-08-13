@@ -51,3 +51,5 @@ create username secret in repo
 # Todo
 - [ ] Birthday Event extension
 - [x] Add Mongo DB for persistence
+
+Deploy failed, as it should have, when git pull failed.
