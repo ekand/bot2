@@ -5,6 +5,7 @@ import logging
 import aiohttp
 import interactions.models
 import pymongo
+from core.base import CustomClient
 from interactions import Button
 from interactions import ButtonStyle
 from interactions import Extension
@@ -16,8 +17,6 @@ from interactions import slash_option
 from interactions import SlashCommandChoice
 from interactions import SlashContext
 from interactions import Task
-
-from core.base import CustomClient
 
 
 class BirthdayEvents(Extension):
@@ -380,7 +379,9 @@ class BirthdayEvents(Extension):
                 "entity_type": entity_type,
             }
         )
-        BOT_AUTH_HEADER = f"https://discord.com/oauth2/authorize?client_id={1139488619405529159}"  # todo change me
+        BOT_AUTH_HEADER = (
+            f"https://discord.com/oauth2/authorize?client_id={self.bot.app.id}"
+        )
         AUTH_HEADERS: dict = {
             "Authorization": f"Bot {self.bot.token}",
             "User-Agent": f"DiscordBot ({BOT_AUTH_HEADER}) Python/3.9 aiohttp/3.7.4",
