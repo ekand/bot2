@@ -2,6 +2,7 @@ import logging
 import os
 import random
 
+from core.base import CustomClient
 from dotenv import find_dotenv
 from dotenv import load_dotenv
 from github import Auth
@@ -12,8 +13,6 @@ from interactions import IntervalTrigger
 from interactions import listen
 from interactions import slash_command
 from interactions import Task
-
-from core.base import CustomClient
 
 load_dotenv(find_dotenv())
 

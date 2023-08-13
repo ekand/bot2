@@ -2,7 +2,6 @@
 .act/
 
 src/config.py
-
 .certificate.pem
 
 # Byte-compiled / optimized / DLL files

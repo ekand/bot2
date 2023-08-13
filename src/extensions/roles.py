@@ -4,6 +4,7 @@ import os
 
 import interactions
 import pymongo
+from core.base import CustomClient
 from dotenv import load_dotenv
 from interactions import Extension
 from interactions import InteractionContext
@@ -14,8 +15,6 @@ from interactions import slash_option
 from interactions import SlashContext
 from interactions.api.events import MessageReactionAdd
 from interactions.api.events import MessageReactionRemove
-
-from core.base import CustomClient
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")

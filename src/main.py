@@ -2,6 +2,8 @@ import logging
 import os
 
 import config
+from core.base import CustomClient
+from core.extensions_loader import load_extensions
 from dotenv import load_dotenv
 from interactions import Intents
 from interactions import listen
@@ -9,8 +11,6 @@ from interactions import MISSING
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
 
-from core.base import CustomClient
-from core.extensions_loader import load_extensions
 
 load_dotenv()
 
@@ -24,6 +24,7 @@ DELETE_UNUSED_APPLICATION_CMDS = (
 )
 
 if __name__ == "__main__":
+
     # load the environmental vars from the .env file
     load_dotenv()
 
@@ -72,6 +73,7 @@ if __name__ == "__main__":
     )
 
     if not DEV_MODE and USE_SENTRY:
+
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))
 
     @listen(
@@ -83,6 +85,7 @@ if __name__ == "__main__":
             await event.ctx.send("Something went wrong.")
 
     # load the debug extension if that is wanted
+
     if LOAD_DEBUG_COMMANDS:
         DebugExtension(bot=bot)
 

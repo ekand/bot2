@@ -1,15 +1,16 @@
 import logging
 import os
 
+from core.base import CustomClient
+from core.utils.basic_utils import get_dev_config
+from core.utils.basic_utils import get_general_settings
 from dotenv import load_dotenv
 from interactions import Extension
 from interactions import IntervalTrigger
 from interactions import listen
 from interactions import Task
 
-from core.base import CustomClient
-from core.utils.basic_utils import get_dev_config
-from core.utils.basic_utils import get_general_settings
+# todo move to config.py
 
 load_dotenv()
 general_settings = get_general_settings()
