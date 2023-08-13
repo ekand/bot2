@@ -17,11 +17,14 @@ ACTIVITY = "interactions.py"  # "Playing <ACTIVITY>"
 # True: enabled
 # False: disabled
 FEATURE_FLAGS = {
+    "birthday_event": True,
     "code_quote": True,
     "error": True,
     "hello_cam": True,
     "latency": True,
+    "meeting_scheduler": False,
     "ping": True,
-    "roles": True,
+    "roles": False,
+    "sleepy": False,
     "time_passed": False,
 }
