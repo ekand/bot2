@@ -12,16 +12,21 @@ class CustomClient(Client):
 
     def __init__(self, dev_mode, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        MONGO_CERT_PATH = os.getenv("MONGO_CERT_PATH")
-        assert MONGO_CERT_PATH is not None
-        MONGO_URI = os.getenv("MONGO_URI")
-        assert MONGO_URI is not None
-        mongo_motor_client = motor.motor_asyncio.AsyncIOMotorClient(
-            MONGO_URI, tlsCertificateKeyFile=MONGO_CERT_PATH
-        )
-        mongo_motor_db = mongo_motor_client["testDB"]
+        try:
+            MONGO_CERT_PATH = os.getenv("MONGO_CERT_PATH")
+            assert MONGO_CERT_PATH is not None
+            MONGO_URI = os.getenv("MONGO_URI")
+            assert MONGO_URI is not None
+            mongo_motor_client = motor.motor_asyncio.AsyncIOMotorClient(
+                MONGO_URI, tlsCertificateKeyFile=MONGO_CERT_PATH
+            )
+            mongo_motor_db = mongo_motor_client["testDB"]
 
-        mongo_motor_collection = mongo_motor_db["testCol"]
+            mongo_motor_collection = mongo_motor_db["testCol"]
+        except AssertionError as e:
+            logging.info(f"assertion error: {e} , Not loading mongo client")
+            mongo_motor_collection = None
+            mongo_motor_db = None
         self.mongo_motor_collection = mongo_motor_collection
         self.mongo_motor_db = mongo_motor_db
         self.dev_mode = dev_mode
