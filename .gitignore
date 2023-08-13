@@ -1,6 +1,8 @@
 # github action local settings
 .act/
 
+src/config.py
+
 .certificate.pem
 
 # Byte-compiled / optimized / DLL files
