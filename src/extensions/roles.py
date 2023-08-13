@@ -4,6 +4,7 @@ import os
 
 import interactions
 import pymongo
+from core.base import CustomClient
 from dotenv import load_dotenv
 from interactions import Extension
 from interactions import InteractionContext
@@ -14,8 +15,6 @@ from interactions import slash_option
 from interactions import SlashContext
 from interactions.api.events import MessageReactionAdd
 from interactions.api.events import MessageReactionRemove
-
-from core.base import CustomClient
 
 load_dotenv()
 test_guild_id = os.getenv("TEST_GUILD_ID")
@@ -63,6 +62,8 @@ class RolesExtension(Extension):
     async def add_role_to_message(self, ctx: SlashContext, role_name: str, emoji: str):
         if role_name in DISALLOWED_ROLE_NAMES:
             raise ValueError("role_name in DISALLOWED_ROLE_NAMES")
+        if role_name not in [role.name for role in ctx.guild.roles]:
+            raise ValueError("role_name not in guild roles")
         search_criteria = {"guild_id": ctx.guild.id}
         sort_criteria = [("created_datetime", pymongo.DESCENDING)]
         most_recent_result = await self.bot.mongo_motor_collection.find_one(
