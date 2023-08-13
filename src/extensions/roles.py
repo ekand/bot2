@@ -10,9 +10,7 @@ from interactions import Extension
 from interactions import InteractionContext
 from interactions import listen
 from interactions import OptionType
-from interactions import Permissions
 from interactions import slash_command
-from interactions import slash_default_member_permission
 from interactions import slash_option
 from interactions import SlashContext
 from interactions.api.events import MessageReactionAdd
@@ -31,7 +29,6 @@ class RolesExtension(Extension):
         name="how-do-i-role-emoji",
         description="Instructions for how to create a role emoji reaction message",
     )
-    @slash_default_member_permission(Permissions.MANAGE_ROLES)
     async def how_do_i(self, ctx: SlashContext):
         await ctx.send(
             "Use /start-role-emoji-message to initialize the message, then use /add-role-to-message one or more times"
@@ -41,8 +38,7 @@ class RolesExtension(Extension):
         name="start-role-emoji-message",
         description="Create Role Assigning Message",
     )
-    @slash_default_member_permission(Permissions.MANAGE_ROLES)
-    async def create_role_emoji_message(self, ctx: InteractionContext):
+    async def start_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
         document = {
             "guild_id": ctx.guild.id,
@@ -50,9 +46,8 @@ class RolesExtension(Extension):
             "current_role_message_id": current_role_message.id,
             "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
         }
-        await self.bot.mongo_motor_db["role_reaction_message_collection"].insert_one(
-            document
-        )
+        await self.bot.mongo_motor_collection.insert_one(document)
+        logging.info("tried to insert mongo document")
 
     @slash_command(name="add-role-to-message")
     @slash_option(
@@ -64,42 +59,31 @@ class RolesExtension(Extension):
     @slash_option(
         name="emoji", description="Emoji", required=True, opt_type=OptionType.STRING
     )
-    @slash_default_member_permission(Permissions.MANAGE_ROLES)
     async def add_role_to_message(self, ctx: SlashContext, role_name: str, emoji: str):
         if role_name in DISALLOWED_ROLE_NAMES:
             raise ValueError("role_name in DISALLOWED_ROLE_NAMES")
-        if role_name not in [role.name for role in ctx.guild.roles]:
-            raise ValueError("role_name not in guild roles")
         search_criteria = {"guild_id": ctx.guild.id}
         sort_criteria = [("created_datetime", pymongo.DESCENDING)]
-        most_recent_message_document = await self.bot.mongo_motor_db[
-            "role_reaction_message_collection"
-        ].find_one(search_criteria, sort=sort_criteria)
-        if most_recent_message_document is None:
-            raise ValueError("in add_role_to_message, most_recent_result is None")
-        role_reactions_collection = self.bot.mongo_motor_db["role_reactions_collection"]
-        role_reaction_document = {
-            "role_name": role_name,
-            "emoji": emoji,
-            "guild_id": most_recent_message_document["guild_id"],
-            "channel_id": most_recent_message_document["channel_id"],
-            "message_id": most_recent_message_document["current_role_message_id"],
-        }
-        role_reactions_collection.insert_one(role_reaction_document)
-        channel = ctx.guild.get_channel(most_recent_message_document["channel_id"])
-        if channel is None:
-            channel = ctx.guild.fetch_channel(
-                most_recent_message_document["channel_id"]
-            )
-        bot_message = channel.get_message(
-            most_recent_message_document["current_role_message_id"]
+        most_recent_result = await self.bot.mongo_motor_collection.find_one(
+            search_criteria, sort=sort_criteria
         )
+        if most_recent_result is None:
+            raise ValueError("in add_role_to_message, most_recent_result is None")
+
+        channel = ctx.guild.get_channel(most_recent_result["channel_id"])
+        if channel is None:
+            channel = ctx.guild.fetch_channel(most_recent_result["channel_id"])
+        bot_message = channel.get_message(most_recent_result["current_role_message_id"])
         if bot_message is None:
             bot_message = await channel.fetch_message(
-                most_recent_message_document["current_role_message_id"]
+                most_recent_result["current_role_message_id"]
             )
-
-        content = self.generate_reaction_message_content_from_mongo_data()
+        current_message_content = bot_message.content
+        content = (
+            current_message_content
+            + "\n"
+            + f"React with {emoji} to gain role {role_name}"
+        )
 
         await bot_message.add_reaction(emoji)
         await bot_message.edit(content=content)
@@ -113,15 +97,16 @@ class RolesExtension(Extension):
             return
         if reaction.message.author.id != reaction.bot.user.id:
             return
-        role_names_and_emojis: [(str, str)] = self.get_mongo_stuff(reaction)
-        for role_name, emoji in self.get_role_and_emoji_from_mongo(reaction):
+        for role_name, emoji in get_role_and_emoji_from_message(
+            reaction.message.content
+        ):
             if role_name is None:
                 continue
             if role_name in DISALLOWED_ROLE_NAMES:
-                continue
+                continue  # todo give error
             selected_role = None
             if emoji != reaction.emoji.name:
-                continue
+                continue  # todo error message
             for role in reaction.message.guild.roles:
                 if role.name == role_name:
                     selected_role = role
@@ -156,32 +141,6 @@ class RolesExtension(Extension):
             else:
                 raise ValueError("on_message_reaction_add(): role_name not recognized")
 
-    def get_role_and_emoji_from_mongo(self, reaction: MessageReactionAdd):
-        channel_id = reaction.message.channel.id
-        message_id = reaction.message.id
-        guild_id = reaction.message.guild.id
-        role_reaction_message_collection = self.bot.mongo_motor_db[
-            "role_reaction_message_collection"
-        ]
-
-        search_criteria = {
-            "current_role_message_id": message_id,
-        }
-        sort_criteria = [("created_datetime", pymongo.DESCENDING)]
-        role_reaction_document = role_reaction_message_collection.find_one(
-            search_criteria, sort=sort_criteria
-        )
-        role_reaction_document["asdf"]
-
-    def generate_reaction_message_content_from_mongo_data(self):
-        return "fake message content"
-
-    def get_mongo_stuff(self, reaction):
-        message_id = reaction.message.id
-        self.bot.mongo_motor_db[""]
-
-        pass
-
 
 def setup(bot: CustomClient):
     """Let interactions load the extension"""
@@ -193,7 +152,7 @@ def get_role_and_emoji_from_message(content: str):
     """Takes content from the role emoji reaction message, which can look like the following:
     Role Emoji Reaction Message
     React with 🌞 to gain role new-role
-    React with 😎 to gain role other-role
+    React with 👒 to gain role other-role
     """
     lines = content.split("\n")
 
