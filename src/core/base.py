@@ -12,12 +12,17 @@ class CustomClient(Client):
 
     def __init__(self, dev_mode, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        MONGO_CERT_PATH = os.getenv("MONGO_CERT_PATH")
+        assert MONGO_CERT_PATH is not None
+        MONGO_URI = os.getenv("MONGO_URI")
+        assert MONGO_URI is not None
         mongo_motor_client = motor.motor_asyncio.AsyncIOMotorClient(
-            os.getenv("MONGO_URI"), tlsCertificateKeyFile=os.getenv("MONGO_CERT_PATH")
+            MONGO_URI, tlsCertificateKeyFile=MONGO_CERT_PATH
         )
         mongo_motor_db = mongo_motor_client["testDB"]
         mongo_motor_collection = mongo_motor_db["testCol"]
         self.mongo_motor_collection = mongo_motor_collection
+        self.mongo_motor_db = mongo_motor_db
         self.dev_mode = dev_mode
 
     # you can use that logger in all your extensions
