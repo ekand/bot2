@@ -47,7 +47,9 @@ It is recommended that you set this up by running:
 updated public key on deploy server
 create username secret in repo
 
-
 # Todo
 - [ ] Birthday Event extension
 - [x] Add Mongo DB for persistence
+- [ ] Meeting Scheduler
+
+Deploy failed, as it should have, when git pull failed.
