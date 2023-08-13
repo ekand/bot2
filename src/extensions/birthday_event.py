@@ -1,27 +1,20 @@
 import datetime
 import json
 import logging
-import traceback
 
 import aiohttp
 import interactions.models
 import pymongo
-from interactions import ActionRow
 from interactions import Button
 from interactions import ButtonStyle
 from interactions import Extension
-from interactions import InputText
-from interactions import InteractionContext
 from interactions import IntervalTrigger
 from interactions import listen
-from interactions import Modal
 from interactions import OptionType
-from interactions import ShortText
 from interactions import slash_command
 from interactions import slash_option
 from interactions import SlashCommandChoice
 from interactions import SlashContext
-from interactions import StringSelectMenu
 from interactions import Task
 
 from core.base import CustomClient
