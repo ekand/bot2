@@ -6,8 +6,10 @@
 import datetime
 import json
 import logging
+from http.client import HTTPException
 
 import aiohttp
+import config
 import interactions.models
 import pymongo
 from core.base import CustomClient
@@ -18,12 +20,15 @@ from interactions import IntervalTrigger
 from interactions import listen
 from interactions import OptionType
 from interactions import Permissions
+from interactions import ScheduledEvent
 from interactions import slash_command
 from interactions import slash_default_member_permission
 from interactions import slash_option
 from interactions import SlashCommandChoice
 from interactions import SlashContext
 from interactions import Task
+
+DEV_MODE = config.DEV_MODE
 
 
 class BirthdayEvents(Extension):
@@ -129,7 +134,7 @@ class BirthdayEvents(Extension):
             "real_or_un_birthday": real_or_un_birthday,
             "last_event_datetime": datetime.datetime(year=2001, month=1, day=1),
             "next_event_datetime": datetime.datetime(
-                year=2023, month=month_option, day=day_option
+                year=2023, month=month_option, day=day_option, hour=16
             ),
             "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
         }
@@ -137,8 +142,12 @@ class BirthdayEvents(Extension):
         logging.info("tried to insert mongo document")
         await ctx.send("added.")
 
-    # @Task.create(IntervalTrigger(seconds=15))
-    @Task.create(IntervalTrigger(hours=7))
+    if DEV_MODE:
+        interval_seconds = 15
+    else:
+        interval_seconds = 25200  # 7 hours
+
+    @Task.create(IntervalTrigger(seconds=interval_seconds))
     async def create_birthday_events(self):
         logging.info("In create_birthday_events")
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
@@ -177,14 +186,22 @@ class BirthdayEvents(Extension):
                         and (event_date - now).seconds > 0
                         and (event_date - now).days < 5
                     ):
+                        _id = birthday_document["_id"]
+                        birthday_document["last_event_datetime"] = event_date
+                        await mongo_motor_birthday_collection.replace_one(
+                            {"_id": _id}, birthday_document
+                        )
                         await self.schedule_discord_event(
                             guild, birthday_document, opt_in_document
                         )
-                    _id = birthday_document["_id"]
-                    birthday_document["last_event_datetime"] = event_date
-                    await mongo_motor_birthday_collection.replace_one(
-                        {"_id": _id}, birthday_document
-                    )
+                        _id = birthday_document["_id"]
+                        birthday_document["last_event_datetime"] = event_date
+                        birthday_document["event_create_success"] = True
+                        await mongo_motor_birthday_collection.replace_one(
+                            {"_id": _id}, birthday_document
+                        )
+
+    #  tried to insert mongo document
 
     # define a function to start the task on startup
     @listen()
@@ -201,25 +218,46 @@ class BirthdayEvents(Extension):
         next_event_datetime: datetime.datetime = birthday_document[
             "next_event_datetime"
         ]
-        next_event_datetime_str = next_event_datetime.strftime("%Y-%m-%dT%H:%M:%S")
-        event_end_time_str = (
-            next_event_datetime + datetime.timedelta(hours=1)
-        ).strftime("%Y-%m-%dT%H:%M:%S")
 
         event_description = f"Happy {'Un-' if birthday_document['real_or_un_birthday'] == 'un' else ''}Birthday!"
         event_name = (
             f"{member_name}'s {'Un-' if birthday_document['real_or_un_birthday'] == 'un' else ''}"
             f"Birthday Party"
         )
-        await self.create_guild_event(
-            guild_id=int(guild.id),
-            event_name=event_name,
-            event_description=event_description,
-            event_start_time=next_event_datetime_str,
-            event_end_time=event_end_time_str,
-            event_metadata={},
-            channel_id=opt_in_document["channel_id"],
-        )
+        from interactions.models.discord.enums import ScheduledEventType
+
+        try:
+            await guild.create_scheduled_event(
+                name=event_name,
+                event_type=2,
+                start_time=next_event_datetime,
+                description=event_description,
+                end_time=next_event_datetime + datetime.timedelta(hours=1),
+                channel_id=opt_in_document["channel_id"],
+            )
+            return True
+        except HTTPException as e:
+            logging.info("hi 91578")
+            logging.error(e)
+            return False
+
+        # my_scheduled_event = ScheduledEvent(client=self.bot,
+        #                                     name=event_name,
+        #                                     description=event_description,
+        #                                     start_time=next_event_datetime,
+        #                                     end_time=next_event_datetime + datetime.timedelta(hours=1),
+        #
+        #                                     )
+        # my_scheduled_event
+        # await self.create_guild_event(
+        #     guild_id=int(guild.id),
+        #     event_name=event_name,
+        #     event_description=event_description,
+        #     event_start_time=next_event_datetime_str,
+        #     event_end_time=event_end_time_str,
+        #     event_metadata={},
+        #     channel_id=opt_in_document["channel_id"],
+        # )
 
 
 def setup(bot: CustomClient):
