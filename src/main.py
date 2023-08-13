@@ -32,6 +32,8 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s UTC || %(levelname)s || %(message)s",
     )
+    print("Logging to logs/interactions.py")
+    logging.info("Logging to logs/interactions.py")
 
     DEV_MODE = config.DEV_MODE
     if DEV_MODE:
@@ -51,9 +53,6 @@ if __name__ == "__main__":
 
     FEATURE_FLAGS = config.FEATURE_FLAGS
     logging.info(f"FEATURE_FLAGS: {FEATURE_FLAGS}")
-
-    print("Logging to logs/interactions.py")
-    logging.info("Logging to logs/interactions.py")
 
     # create our bot instance
     intents = Intents.DEFAULT  # todo decrease intents needed
