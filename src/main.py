@@ -78,10 +78,8 @@ if __name__ == "__main__":
     )  # tell the dispatcher that this replaces the default listener
     async def on_command_error(event: CommandError):
         logging.error(event.error.__repr__())
-        if not event.ctx.client.responded:  # todo check if this is right
-            await event.ctx.client.send(
-                "Something went wrong."
-            )  # todo check if this is right
+        if not event.ctx.responded:
+            await event.ctx.send("Something went wrong.")
 
     # load the debug extension if that is wanted
     if LOAD_DEBUG_COMMANDS:
