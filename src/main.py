@@ -1,7 +1,7 @@
 import logging
 import os
+import traceback
 
-import config
 from core.base import CustomClient
 from core.extensions_loader import load_extensions
 from dotenv import load_dotenv
@@ -10,6 +10,8 @@ from interactions import listen
 from interactions import MISSING
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
+
+import config
 
 
 load_dotenv()
@@ -80,6 +82,7 @@ if __name__ == "__main__":
     )  # tell the dispatcher that this replaces the default listener
     async def on_command_error(event: CommandError):
         logging.error(event.error.__repr__())
+        logging.error(traceback.format_exc())
         if not event.ctx.responded:
             await event.ctx.send("Something went wrong.")
 

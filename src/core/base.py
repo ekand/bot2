@@ -20,6 +20,7 @@ class CustomClient(Client):
             MONGO_URI, tlsCertificateKeyFile=MONGO_CERT_PATH
         )
         mongo_motor_db = mongo_motor_client["testDB"]
+
         mongo_motor_collection = mongo_motor_db["testCol"]
         self.mongo_motor_collection = mongo_motor_collection
         self.mongo_motor_db = mongo_motor_db
