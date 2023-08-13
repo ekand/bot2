@@ -12,7 +12,9 @@ from interactions import Extension
 from interactions import IntervalTrigger
 from interactions import listen
 from interactions import OptionType
+from interactions import Permissions
 from interactions import slash_command
+from interactions import slash_default_member_permission
 from interactions import slash_option
 from interactions import SlashCommandChoice
 from interactions import SlashContext
@@ -22,7 +24,8 @@ from interactions import Task
 class BirthdayEvents(Extension):
     bot: CustomClient
 
-    @slash_command(name="opt-out-server-from-birthday-events")
+    @slash_command(name="opt-out-from-birthday-events")
+    @slash_default_member_permission(Permissions.MANAGE_EVENTS)
     async def opt_out_server_from_birthday_events(self, ctx: SlashContext):
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
             "server_birthday_event_opt_in_collection"
@@ -37,6 +40,7 @@ class BirthdayEvents(Extension):
         await ctx.send("opted_out")
 
     @slash_command(name="opt-in-server-to-birthday-events")
+    @slash_default_member_permission(Permissions.MANAGE_EVENTS)
     async def opt_in_server_to_birthday_events(self, ctx: SlashContext):
         await ctx.defer()
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
@@ -52,7 +56,6 @@ class BirthdayEvents(Extension):
                     label=birthday_channel.name,
                 )
             )
-        from asyncio import TimeoutError
 
         await ctx.send(
             "Please choose a channel for the events.", components=choices_list
@@ -166,48 +169,8 @@ class BirthdayEvents(Extension):
         logging.info("tried to insert mongo document")
         await ctx.send("added.")
 
-    #     @slash_option(
-    #         name="birthday_type",
-    #         description="Integer Option",
-    #         required=True,
-    #         opt_type=OptionType.STRING,
-    #         choices=[
-    #             SlashCommandChoice(name="Real Birthday", value='real_birthday'),
-    #             SlashCommandChoice(name="Un-Birthday", value='un_birthday')
-    #         ]
-
-    # def schedule_discord_event(self, guild, document):
-    #
-    #     await self.create_guild_event(guild_id=guild.id,
-    #         event_name=f"Birthday Party For {guild.fetch_member(document['member_id'])}",
-    #         event_description="Happy Birthday!",
-    #         event_start_time=document['next_event_datetime'].strftime('%Y-%m-%dT%H:%M:%S'),
-    #         event_end_time=(document['next_event_datetime'] + datetime.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S'),
-    #         event_metadata={},
-    #                                   event_privacy_level=2
-    #                                   channel_id=
-    #
-    #
-    #                                   )
-    # : str,
-    # : str,
-    # : str,
-    # : dict,
-    #  = 2,
-    # channel_id = None
-    # )
-
-    # document = {
-    #     "guild_id": ctx.guild.id,
-    #     "member_id": ctx.member.id,
-    #     "month": month,
-    #     "day": day,
-    #     'last_event_datetime': datetime.datetime(year=2021)
-    #     "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
-    # }
-
-    # @Task.create(IntervalTrigger(hours=11))
-    @Task.create(IntervalTrigger(seconds=5))
+    # @Task.create(IntervalTrigger(seconds=15))
+    @Task.create(IntervalTrigger(hours=7))
     async def create_birthday_events(self):
         logging.info("In create_birthday_events")
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
@@ -249,11 +212,11 @@ class BirthdayEvents(Extension):
                         await self.schedule_discord_event(
                             guild, birthday_document, opt_in_document
                         )
-                _id = birthday_document["_id"]
-                birthday_document["last_event_datetime"] = event_date
-                mongo_motor_birthday_collection.replace_one(
-                    {"_id": _id}, birthday_document
-                )
+                    _id = birthday_document["_id"]
+                    birthday_document["last_event_datetime"] = event_date
+                    await mongo_motor_birthday_collection.replace_one(
+                        {"_id": _id}, birthday_document
+                    )
 
     # define a function to start the task on startup
     @listen()
@@ -275,14 +238,15 @@ class BirthdayEvents(Extension):
             next_event_datetime + datetime.timedelta(hours=1)
         ).strftime("%Y-%m-%dT%H:%M:%S")
 
-        #     async def create_guild_event_2(self, guild_id: int, event_name: str,
-        #                                  event_description: str, event_start_time: str, event_end_time: str,
-        #                                  event_metadata: dict, channel_id: int = None):
-
-        await self.create_guild_event_2(
+        event_description = f"Happy {'Un-' if birthday_document['real_or_un_birthday'] == 'un' else ''}Birthday!"
+        event_name = (
+            f"{member_name}'s {'Un-' if birthday_document['real_or_un_birthday'] == 'un' else ''}"
+            f"Birthday Party"
+        )
+        await self.create_guild_event(
             guild_id=int(guild.id),
-            event_name=f"{member_name}'s Birthday Party",
-            event_description="Happy Birthday!",
+            event_name=event_name,
+            event_description=event_description,
             event_start_time=next_event_datetime_str,
             event_end_time=event_end_time_str,
             event_metadata={},
@@ -290,50 +254,6 @@ class BirthdayEvents(Extension):
         )
 
     async def create_guild_event(
-        self,
-        guild_id: str,
-        event_name: str,
-        event_description: str,
-        event_start_time: str,
-        event_end_time: str,
-        event_metadata: dict,
-        event_privacy_level=2,
-        channel_id=None,
-    ) -> None:
-        auth_headers = {
-            "Authorization": f"Bot {self.bot.token}",
-            "User-Agent": "DiscordBot (https://your.bot/url) Python/3.9 aiohttp/3.8.1",
-            "Content-Type": "application/json",
-        }
-        base_api_url = "https://discord.com/api"
-        """Creates a guild event using the supplied arguments
-        The expected event_metadata format is event_metadata={'location': 'YOUR_LOCATION_NAME'}
-        The required time format is %Y-%m-%dT%H:%M:%S"""
-        event_create_url = f"{base_api_url}/guilds/{guild_id}/scheduled-events"
-        event_data = json.dumps(
-            {
-                "name": event_name,
-                "privacy_level": event_privacy_level,
-                "scheduled_start_time": event_start_time,
-                "scheduled_end_time": event_end_time,
-                "description": event_description,
-                "channel_id": channel_id,
-                "entity_metadata": event_metadata,
-                "entity_type": 3,
-            }
-        )
-
-        async with aiohttp.ClientSession(headers=auth_headers) as session:
-            try:
-                async with session.post(event_create_url, data=event_data) as response:
-                    response.raise_for_status()
-                    assert response.status == 200
-            except Exception as e:
-                logging.error(f"EXCEPTION: {e}")
-            finally:
-                await session.close()
-
-    async def create_guild_event_2(
         self,
         guild_id: int,
         event_name: str,
@@ -379,9 +299,7 @@ class BirthdayEvents(Extension):
                 "entity_type": entity_type,
             }
         )
-        BOT_AUTH_HEADER = (
-            f"https://discord.com/oauth2/authorize?client_id={self.bot.app.id}"
-        )
+        BOT_AUTH_HEADER = f"https://discord.com/oauth2/authorize?client_id={1139488619405529159}"  # todo change me
         AUTH_HEADERS: dict = {
             "Authorization": f"Bot {self.bot.token}",
             "User-Agent": f"DiscordBot ({BOT_AUTH_HEADER}) Python/3.9 aiohttp/3.7.4",

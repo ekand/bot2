@@ -73,7 +73,6 @@ if __name__ == "__main__":
     )
 
     if not DEV_MODE and USE_SENTRY:
-
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))
 
     @listen(
@@ -85,7 +84,6 @@ if __name__ == "__main__":
             await event.ctx.send("Something went wrong.")
 
     # load the debug extension if that is wanted
-
     if LOAD_DEBUG_COMMANDS:
         DebugExtension(bot=bot)
 

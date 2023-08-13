@@ -51,3 +51,5 @@ create username secret in repo
 - [ ] Birthday Event extension
 - [x] Add Mongo DB for persistence
 - [ ] Meeting Scheduler
+
+Deploy failed, as it should have, when git pull failed.

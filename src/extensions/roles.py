@@ -10,7 +10,9 @@ from interactions import Extension
 from interactions import InteractionContext
 from interactions import listen
 from interactions import OptionType
+from interactions import Permissions
 from interactions import slash_command
+from interactions import slash_default_member_permission
 from interactions import slash_option
 from interactions import SlashContext
 from interactions.api.events import MessageReactionAdd
@@ -29,6 +31,7 @@ class RolesExtension(Extension):
         name="how-do-i-role-emoji",
         description="Instructions for how to create a role emoji reaction message",
     )
+    @slash_default_member_permission(Permissions.MANAGE_ROLES)
     async def how_do_i(self, ctx: SlashContext):
         await ctx.send(
             "Use /start-role-emoji-message to initialize the message, then use /add-role-to-message one or more times"
@@ -38,7 +41,8 @@ class RolesExtension(Extension):
         name="start-role-emoji-message",
         description="Create Role Assigning Message",
     )
-    async def start_role_emoji_message(self, ctx: InteractionContext):
+    @slash_default_member_permission(Permissions.MANAGE_ROLES)
+    async def create_role_emoji_message(self, ctx: InteractionContext):
         current_role_message = await ctx.send("Role Emoji Reaction Message")
         document = {
             "guild_id": ctx.guild.id,
@@ -59,6 +63,7 @@ class RolesExtension(Extension):
     @slash_option(
         name="emoji", description="Emoji", required=True, opt_type=OptionType.STRING
     )
+    @slash_default_member_permission(Permissions.MANAGE_ROLES)
     async def add_role_to_message(self, ctx: SlashContext, role_name: str, emoji: str):
         if role_name in DISALLOWED_ROLE_NAMES:
             raise ValueError("role_name in DISALLOWED_ROLE_NAMES")
