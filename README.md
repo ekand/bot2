@@ -13,6 +13,17 @@ There are multiple ways to launch the application.
 ### Python
 To start the bot with python, you first need to install the required packages with either `poetry install` or `pip install -r requirements.txt`
 
+Next, you need to set up some configurations for your local machine.
+
+Copy .env.example to .env, and replace 'changeme' with appropriate values.
+
+Copy src/example_config.py to src/config.py and replace the fake IDs with IDs from your dev server.
+
+If you don't require a mongo database for your extension, you may leave out MONGO_URI and MONGO_CERT_PATH.
+
+If you are using MongoDB atlas, you will need to white-list your IP in order to connect.
+
+If you prefer to use a local instance of MongoDB, add an environment variable called MONGO_LOCAL_URI.
 
 Then, run:
 
