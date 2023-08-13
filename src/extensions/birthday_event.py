@@ -1,14 +1,44 @@
-"""Creates scheduled guild events for (un-)birthdays
+"""Birthday Events: Creates scheduled guild events for
+member birthdays and un-birthdays.
 
+A server member with `MANAGE_EVENTS` permissions may use
+\opt-in-server-to-birthday-events to opt in a server
+for birthday events and choose a channel for the events, or
+use \opt_out_server_from_birthday_events to remove the server
+from participating in birthday events.
 
+The associated functions, `opt_out_server_from_birthday_events`
+and `opt_in_server_to_birthday_events` use the motor library
+for mongodb to save this information to Mongo DB Atlas.
 
+A server member may user \register-birthday to add their birthday
+to the mongo database. They may select real birthday or un-birthday,
+as well as a month and year (integers). The function `register_birthday`
+implements this and saves information to mongo.
+
+The function `create_birthday_events` exists as a task with an
+interval trigger of `interval_seconds` which is 15 for DEV_MODE
+or 25200 (7 hrs) for standard mode. This function looks at each
+guild and checks if it is opted in. Then for each guild it iterates
+over birthday_document records in descending order of creation, skipping
+documents for a user that has already been seen.
+If the event date is soon but not too soon, and the most recent event
+is more than a year ago, a new server event is scheduled and
+the last_event_datetime value is update in mongodb, as well as
+an "event_create_success" value.
+
+Function `on_startup` activates the `create_birthday_events` function.
+
+Function schedule_discord_event parses information from a provided guild,
+a mongo birthday document, and mongo opt_in_document for the guild.
+From this it calls "guild.create_scheduled_event" to create the event.
+
+Function setup adds the BirthdayEvents extension to the bot.
 """
 import datetime
-import json
 import logging
 from http.client import HTTPException
 
-import aiohttp
 import config
 import interactions.models
 import pymongo
@@ -20,13 +50,14 @@ from interactions import IntervalTrigger
 from interactions import listen
 from interactions import OptionType
 from interactions import Permissions
-from interactions import ScheduledEvent
 from interactions import slash_command
 from interactions import slash_default_member_permission
 from interactions import slash_option
 from interactions import SlashCommandChoice
 from interactions import SlashContext
 from interactions import Task
+
+# TODO: Refactor into more functions
 
 DEV_MODE = config.DEV_MODE
 
@@ -123,7 +154,7 @@ class BirthdayEvents(Extension):
         month_option: int,
         day_option: int,
         real_or_un_birthday: str,
-    ):  # , birthday_type: str
+    ):
         await ctx.defer()
         mongo_motor_birthday_collection = self.bot.mongo_motor_db["birthdayCollection"]
         document = {
@@ -201,8 +232,6 @@ class BirthdayEvents(Extension):
                             {"_id": _id}, birthday_document
                         )
 
-    #  tried to insert mongo document
-
     # define a function to start the task on startup
     @listen()
     async def on_startup(self):
@@ -224,7 +253,6 @@ class BirthdayEvents(Extension):
             f"{member_name}'s {'Un-' if birthday_document['real_or_un_birthday'] == 'un' else ''}"
             f"Birthday Party"
         )
-        from interactions.models.discord.enums import ScheduledEventType
 
         try:
             await guild.create_scheduled_event(
@@ -240,24 +268,6 @@ class BirthdayEvents(Extension):
             logging.info("hi 91578")
             logging.error(e)
             return False
-
-        # my_scheduled_event = ScheduledEvent(client=self.bot,
-        #                                     name=event_name,
-        #                                     description=event_description,
-        #                                     start_time=next_event_datetime,
-        #                                     end_time=next_event_datetime + datetime.timedelta(hours=1),
-        #
-        #                                     )
-        # my_scheduled_event
-        # await self.create_guild_event(
-        #     guild_id=int(guild.id),
-        #     event_name=event_name,
-        #     event_description=event_description,
-        #     event_start_time=next_event_datetime_str,
-        #     event_end_time=event_end_time_str,
-        #     event_metadata={},
-        #     channel_id=opt_in_document["channel_id"],
-        # )
 
 
 def setup(bot: CustomClient):
