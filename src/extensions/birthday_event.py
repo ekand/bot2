@@ -30,7 +30,7 @@ from core.base import CustomClient
 class BirthdayEvents(Extension):
     bot: CustomClient
 
-    @slash_command(name="opt-out-server-events")
+    @slash_command(name="opt-out-server-from-birthday-events")
     async def opt_out_server_from_birthday_events(self, ctx: SlashContext):
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
             "server_birthday_event_opt_in_collection"
@@ -139,8 +139,22 @@ class BirthdayEvents(Extension):
         min_value=1,
         max_value=31,
     )
+    @slash_option(
+        name="real_or_un_birthday",
+        description="Choose Real Birthday or Un-Birthday",
+        required=True,
+        opt_type=OptionType.STRING,
+        choices=[
+            SlashCommandChoice(name="Real Birthday", value="real"),
+            SlashCommandChoice(name="Un-Birthday", value="un"),
+        ],
+    )
     async def register_birthday(
-        self, ctx: SlashContext, month_option, day_option
+        self,
+        ctx: SlashContext,
+        month_option: int,
+        day_option: int,
+        real_or_un_birthday: str,
     ):  # , birthday_type: str
         await ctx.defer()
         mongo_motor_birthday_collection = self.bot.mongo_motor_db["birthdayCollection"]
@@ -149,6 +163,7 @@ class BirthdayEvents(Extension):
             "member_id": ctx.member.id,
             "month": month_option,
             "day": day_option,
+            "real_or_un_birthday": real_or_un_birthday,
             "last_event_datetime": datetime.datetime(year=2001, month=1, day=1),
             "next_event_datetime": datetime.datetime(
                 year=2023, month=month_option, day=day_option
@@ -232,7 +247,7 @@ class BirthdayEvents(Extension):
                     day=birthday_document["day"],
                 )
                 now = datetime.datetime.now()
-                if (event_date - now).seconds > 0 and (event_date - now).days < 1:
+                if (event_date - now).seconds > 0 and (event_date - now).days <= 3:
                     if (
                         (event_date - birthday_document["last_event_datetime"]).days
                         > 364
