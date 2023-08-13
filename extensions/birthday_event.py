@@ -200,7 +200,7 @@ class BirthdayEvents(Extension):
     # }
 
     # @Task.create(IntervalTrigger(hours=11))
-    @Task.create(IntervalTrigger(seconds=5))
+    @Task.create(IntervalTrigger(seconds=15))
     async def create_birthday_events(self):
         logging.info("In create_birthday_events")
         server_birthday_event_opt_in_collection = self.bot.mongo_motor_db[
@@ -272,6 +272,7 @@ class BirthdayEvents(Extension):
         #                                  event_description: str, event_start_time: str, event_end_time: str,
         #                                  event_metadata: dict, channel_id: int = None):
 
+        logging.info("in schedule_discord_event, calling create_guild_event_2")
         await self.create_guild_event_2(
             guild_id=int(guild.id),
             event_name=f"{member_name}'s Birthday Party",
