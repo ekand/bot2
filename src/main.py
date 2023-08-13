@@ -7,6 +7,7 @@ from core.extensions_loader import load_extensions
 from dotenv import load_dotenv
 from interactions import Intents
 from interactions import listen
+from interactions import MISSING
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
 
@@ -40,9 +41,8 @@ if __name__ == "__main__":
         DEV_USER_ID = config.DEV_USER_ID
         DEBUG_SCOPE = DEV_GUILD_ID
     else:
-        LOAD_DEBUG_COMMANDS = (
-            DEV_GUILD_ID
-        ) = DEV_CHANNEL_ID = DEV_USER_ID = DEBUG_SCOPE = None
+        LOAD_DEBUG_COMMANDS = DEV_GUILD_ID = DEV_CHANNEL_ID = DEV_USER_ID = None
+        DEBUG_SCOPE = MISSING
 
     ACTIVITY = config.ACTIVITY
     USE_SENTRY = config.USE_SENTRY
