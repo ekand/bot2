@@ -67,5 +67,4 @@ if __name__ == "__main__":
     load_extensions(bot=bot, feature_flags=config.FEATURE_FLAGS)
 
     # start the bot
-
     bot.start(os.getenv("DISCORD_TOKEN"))

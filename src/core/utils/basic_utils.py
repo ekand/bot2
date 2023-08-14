@@ -24,7 +24,3 @@ def load_config():
     config_file_path = os.sep.join([repo_root_dir_path, config_file_name])
     config.read(config_file_path)
     return config
-
-
-if __name__ == "__main__":
-    print(feature_flags_dict)
