@@ -10,7 +10,7 @@ The event duration will be one hour
 import datetime
 import logging
 
-from src.core.base import CustomClient
+from core.base import CustomClient
 from interactions import Button
 from interactions import ButtonStyle
 from interactions import Extension
