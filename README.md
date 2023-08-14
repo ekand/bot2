@@ -1,67 +1,72 @@
-# bot2
-
-
-
+# Bot2
 
 A discord bot made with [interactions.py](https://github.com/interactions-py/interactions.py).
 Visit [the official website](https://interactions-py.github.io/interactions.py/) to get started.
 
-# Running the Application
-There are multiple ways to launch the application.
+## Development installation
 
+<details>
+<summary>Click to expand</summary>
+
+### Mongodb
+
+You can either use a local mongodb instance or use mongodb atlas.
+
+#### Local
+
+1. Install mongodb on your machine ([Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/),
+   [Mac](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/),
+   [Linux](https://docs.mongodb.com/manual/administration/install-on-linux/))
+2. Create a database called `bot2`
 
 ### Python
-To start the bot with python, you first need to install the required packages with either `poetry install` or `pip install -r requirements.txt`
 
-Next, you need to set up some configurations for your local machine.
+1. Create a virtual environment
 
-Copy .env.example to .env, and replace 'changeme' with appropriate values.
+2. Install packages using either poetry or pip `poetry install` or `pip install -r requirements.txt`
 
-Copy src/example_config.py to src/config.py and replace the fake IDs with IDs from your dev server.
+3. Change the name of `src/example_config.py` to `src/config.py` and fill in the required fields (Mandatory fields
+   below)
+    - DEV_GUILD_ID
+    - DEV_CHANNEL_ID
+    - DEV_ROLE_ID
 
-If you don't require a mongo database for your extension, you may leave out MONGO_URI and MONGO_CERT_PATH.
+4. Change the name of `.env.example` to `.env` and fill in the required fields (Mandatory fields below)
+    - PROJECT_NAME
+    - DISCORD_TOKEN
 
-If you are using MongoDB atlas, you will need to white-list your IP in order to connect.
+5. [Optional] Incase you want to use mongodb atlas, fill in the required fields in `.env` and `src/config.py`
+    - `.env`
+        - MONGO_URI
+        - MONGO_CERT_PATH
+    - `src/config.py`
+        - MONGO_MODE = "atlas" (from localhost to atlas)
 
-If you prefer to use a local instance of MongoDB, add an environment variable called MONGO_LOCAL_URI.
+```bash
+python src/main.py
+```
 
-Then, run:
-
-1) `python main.py`
-
-
-### Docker-Compose
-You can use the pre-made docker-compose by running:
-
-1) `docker-compose up`
-
-### Docker
-For most users, the use of `docker-compose` is highly recommended.
-
-Nevertheless, you can import the pre-made Dockerfile into your own docker-compose or run it manually by with:
-
-1) `docker build -t your_project_name .`
-2) `docker run -it your_project_name`
-
-Note: Make sure that you created a volume so that you local `./logs` folder gets populated.
+</details>
 
 # Additional Information
+
 Additionally, this comes with a pre-made [pre-commit](https://pre-commit.com) config to keep your code clean.
 
 It is recommended that you set this up by running:
 
-1) `pip install pre-commit`
-2) `pre-commit install`
+```bash
+pip install pre-commit
+```
 
+```bash
+pre-commit install
+```
 
 ---
-updated public key on deploy server
-create username secret in repo
 
 # Todo
+
 - [ ] Birthday Event extension
 - [x] Add Mongo DB for persistence
 - [ ] Meeting Scheduler
 - [ ] create event while creating the object
-
-Deploy failed, as it should have, when git pull failed.
