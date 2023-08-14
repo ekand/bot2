@@ -7,7 +7,7 @@ with open(".env") as f:
 out_lines = []
 for line in lines:
     first_part = line.split("=")[0]
-    out_lines.append(first_part + "= " + "changeme")
+    out_lines.append(first_part + "=" + "changeme")
 
 if os.path.exists("test.env.example"):
     raise ValueError("test.env.example already exists")

@@ -1,6 +1,7 @@
 # github action local settings
 .act/
 
+# Exluce configs
 src/config.py
 .certificate.pem
 
