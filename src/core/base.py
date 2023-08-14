@@ -22,7 +22,7 @@ import config
 
 def parse_mongo_database_name(uri: str) -> str:
     parsed_uri = urlparse(uri)
-    if parsed_uri.scheme != 'mongodb':
+    if parsed_uri.scheme not in ["mongodb", "mongodb+srv"]:
         raise ValueError("Invalid MongoDB URI. Scheme must be 'mongodb'.")
 
     if parsed_uri.path:
@@ -125,7 +125,8 @@ class CustomClient(Client):
         self.dev_mode = dev_mode
 
         # Set database
-        db_client = asyncio.run(setup_mongodb(mongo_mode))
+        asyncio.get_event_loop().run_until_complete(setup_mongodb(mongo_mode))
+        db_client = get_mongo_motor_client(mongo_mode)
         self.mongo_motor_db = db_client.get_database()
 
     @listen()
