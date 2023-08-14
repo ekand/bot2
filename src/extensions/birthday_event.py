@@ -170,7 +170,6 @@ class BirthdayEvents(Extension):
             "created_datetime": datetime.datetime.now(tz=datetime.timezone.utc),
         }
         result = await mongo_motor_birthday_collection.insert_one(document)
-        print(result)
         logging.info("tried to insert mongo document")
         await ctx.send("added.")
 
