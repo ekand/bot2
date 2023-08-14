@@ -198,6 +198,8 @@ class BirthdayEvents(Extension):
             latest_documents.sort(key=lambda x: x["created_date"], reverse=True)
 
             # Select first doc
+            if len(opt_in_document) == 0:
+                continue
             opt_in_document = latest_documents[0]
 
             if opt_in_document is None:
