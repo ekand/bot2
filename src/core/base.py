@@ -14,6 +14,7 @@ from interactions import listen
 
 
 # TODO remove 'mongo_motor_collection'
+# TODO check if collections exists, if not create them
 
 def get_mongo_uri(mongo_mode):
     """Returns the mongo_uri based on the dev_mode"""
