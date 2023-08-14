@@ -149,11 +149,11 @@ class BirthdayEvents(Extension):
         ],
     )
     async def register_birthday(
-            self,
-            ctx: SlashContext,
-            month_option: int,
-            day_option: int,
-            real_or_un_birthday: str,
+        self,
+        ctx: SlashContext,
+        month_option: int,
+        day_option: int,
+        real_or_un_birthday: str,
     ):
         await ctx.defer()
         mongo_motor_birthday_collection = self.bot.mongo_motor_db["birthdayCollection"]
@@ -190,7 +190,9 @@ class BirthdayEvents(Extension):
             search_criteria = {"guild_id": guild.id}
 
             # Find the latest document asynchronously
-            latest_documents = await server_birthday_event_opt_in_collection.find(search_criteria).to_list(length=None)
+            latest_documents = await server_birthday_event_opt_in_collection.find(
+                search_criteria
+            ).to_list(length=None)
 
             # Sort the documents by date in descending order
             latest_documents.sort(key=lambda x: x["created_date"], reverse=True)
@@ -204,8 +206,8 @@ class BirthdayEvents(Extension):
                 continue
             seen_users = set()
             async for birthday_document in mongo_motor_birthday_collection.find(
-                    {"guild_id": {"$eq": guild.id}},
-                    sort=[("created_datetime", pymongo.DESCENDING)],
+                {"guild_id": {"$eq": guild.id}},
+                sort=[("created_datetime", pymongo.DESCENDING)],
             ):
                 member_id = birthday_document["member_id"]
                 if member_id in seen_users:
@@ -219,10 +221,10 @@ class BirthdayEvents(Extension):
                 now = datetime.datetime.now()
                 if (event_date - now).seconds > 0 and (event_date - now).days <= 3:
                     if (
-                            (event_date - birthday_document["last_event_datetime"]).days
-                            > 364
-                            and (event_date - now).seconds > 0
-                            and (event_date - now).days < 5
+                        (event_date - birthday_document["last_event_datetime"]).days
+                        > 364
+                        and (event_date - now).seconds > 0
+                        and (event_date - now).days < 5
                     ):
                         _id = birthday_document["_id"]
                         birthday_document["last_event_datetime"] = event_date
@@ -245,7 +247,7 @@ class BirthdayEvents(Extension):
         self.create_birthday_events.start()
 
     async def schedule_discord_event(
-            self, guild: interactions.models.Guild, birthday_document, opt_in_document
+        self, guild: interactions.models.Guild, birthday_document, opt_in_document
     ):
         member = guild.get_member(birthday_document["member_id"])
         if member is None:

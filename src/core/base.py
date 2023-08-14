@@ -16,6 +16,7 @@ from interactions import listen
 # TODO remove 'mongo_motor_collection'
 # TODO check if collections exists, if not create them
 
+
 def get_mongo_uri(mongo_mode):
     """Returns the mongo_uri based on the dev_mode"""
     mongo_uri = None
@@ -43,8 +44,9 @@ def get_mongo_motor_client(mongo_mode):
 
     # Create the mongo_motor_client for atlas
     elif mongo_mode == "atlas":
-        mongo_motor_client = motor.motor_asyncio.AsyncIOMotorClient(mongo_uri,
-                                                                    tlscertificateKeyFile=os.getenv("MONGO_CERT_PATH"))
+        mongo_motor_client = motor.motor_asyncio.AsyncIOMotorClient(
+            mongo_uri, tlscertificateKeyFile=os.getenv("MONGO_CERT_PATH")
+        )
     else:
         raise ValueError(f"mongo_mode {mongo_mode} not recognized")
 

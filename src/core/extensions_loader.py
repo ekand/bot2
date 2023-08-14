@@ -1,7 +1,7 @@
 import logging
 import os
 
-from src.core.base import CustomClient
+from core.base import CustomClient
 
 
 def load_extensions(bot: CustomClient, feature_flags: dict):

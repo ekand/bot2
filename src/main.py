@@ -3,16 +3,18 @@ import logging
 import os
 import traceback
 
-# Third party imports
+import config
 from core.base import CustomClient
 from core.extensions_loader import load_extensions
 from dotenv import load_dotenv
-from interactions import Intents, listen, MISSING
+from interactions import Intents
+from interactions import listen
+from interactions import MISSING
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
 
+# Third party imports
 # Local imports
-import config
 
 if __name__ == "__main__":
     # load the environmental vars from the .env file
@@ -47,17 +49,13 @@ if __name__ == "__main__":
     if not config.DEV_MODE and config.USE_SENTRY:
         bot.load_extension("interactions.ext.sentry", token=os.getenv("SENTRY_DSN"))
 
-
-    @listen(
-        CommandError, disable_default_listeners=True
-    )
+    @listen(CommandError, disable_default_listeners=True)
     async def on_command_error(event: CommandError):
         # tell the dispatcher that this replaces the default listener
         logging.error(event.error.__repr__())
         logging.error(traceback.format_exc())
         if not event.ctx.responded:
             await event.ctx.send("Something went wrong.")
-
 
     # load the debug extension if that is wanted
     if config.LOAD_DEBUG_COMMANDS:
