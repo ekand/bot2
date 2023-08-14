@@ -1,8 +1,7 @@
+from core.base import CustomClient
 from interactions import Extension
 from interactions import InteractionContext
 from interactions import slash_command
-
-from core.base import CustomClient
 
 
 class Ping(Extension):
