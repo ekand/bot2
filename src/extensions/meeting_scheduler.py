@@ -20,7 +20,7 @@ from interactions import listen
 from interactions import slash_command
 from interactions import Task
 
-# from core.utils import create_scheduled_event
+from core.utils import create_scheduled_event
 
 
 class MeetingScheduler(Extension):

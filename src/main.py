@@ -3,7 +3,7 @@ import logging
 import os
 import traceback
 
-import config
+# Third party imports
 from core.base import CustomClient
 from core.extensions_loader import load_extensions
 from dotenv import load_dotenv
@@ -13,8 +13,8 @@ from interactions import MISSING
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
 
-# Third party imports
 # Local imports
+import config
 
 if __name__ == "__main__":
     # load the environmental vars from the .env file
