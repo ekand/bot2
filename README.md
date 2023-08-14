@@ -31,13 +31,15 @@ You can either use a local mongodb instance or use mongodb atlas.
     - DEV_CHANNEL_ID
     - DEV_ROLE_ID
 
-4. Change the name of `.env.example` to `.env` and fill in the required fields (Mandatory fields below)
+4. [Optional] Change the name of `.env.example` to `.env` and fill in the required fields (Mandatory fields below)
     - PROJECT_NAME
     - DISCORD_TOKEN
+    - MONGO_LOCAL_URI (Add db name at the end example: `mongodb://localhost:27017/DATABASE_NAME`)
 
 5. [Optional] Incase you want to use mongodb atlas, fill in the required fields in `.env` and `src/config.py`
     - `.env`
-        - MONGO_URI
+        - MONGO_URI (Add db name at the end
+          example: `mongodb+srv://<cluster-url>/DATABASE_NAME?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority`)
         - MONGO_CERT_PATH
     - `src/config.py`
         - MONGO_MODE = "atlas" (from localhost to atlas)
