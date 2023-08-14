@@ -197,6 +197,10 @@ class BirthdayEvents(Extension):
             # Sort the documents by date in descending order
             latest_documents.sort(key=lambda x: x["created_date"], reverse=True)
 
+            # Check if there are any documents
+            if len(latest_documents) == 0:
+                continue
+
             # Select first doc
             if len(opt_in_document) == 0:
                 continue
