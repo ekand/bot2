@@ -10,7 +10,7 @@ The event duration will be one hour
 import datetime
 import logging
 
-from core.base import CustomClient
+from src.core.base import CustomClient
 from interactions import Button
 from interactions import ButtonStyle
 from interactions import Extension
@@ -20,7 +20,7 @@ from interactions import listen
 from interactions import slash_command
 from interactions import Task
 
-# from core.utils import create_scheduled_event
+from core.utils import create_scheduled_event
 
 
 class MeetingScheduler(Extension):
