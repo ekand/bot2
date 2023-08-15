@@ -34,7 +34,7 @@ You can either use a local mongodb instance or use mongodb atlas.
    below)
     - DEV_GUILD_ID
     - DEV_CHANNEL_ID
-    - DEV_ROLE_ID
+    - DEV_USER_ID
     - MONGO_MODE (see below)
       
 4. Change the name of `.env.example` to `.env` and fill in the required fields (Mandatory fields below)
