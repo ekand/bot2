@@ -21,6 +21,11 @@ You can either use a local mongodb instance or use mongodb atlas.
 
 ### Python
 
+0. Clone this repository and, if needed, check out the appropriate feature branch.
+
+0.1. You will need your own Discord bot account with a token. See [here](https://interactions-py.github.io/interactions.py/Guides/02%20Creating%20Your%20Bot/).
+
+
 1. Create a virtual environment
 
 2. Install packages using either poetry or pip `poetry install` or `pip install -r requirements.txt`
@@ -30,19 +35,27 @@ You can either use a local mongodb instance or use mongodb atlas.
     - DEV_GUILD_ID
     - DEV_CHANNEL_ID
     - DEV_ROLE_ID
-
-4. [Optional] Change the name of `.env.example` to `.env` and fill in the required fields (Mandatory fields below)
+    - MONGO_MODE (see below)
+      
+4. Change the name of `.env.example` to `.env` and fill in the required fields (Mandatory fields below)
     - PROJECT_NAME
     - DISCORD_TOKEN
-    - MONGO_LOCAL_URI (Add db name at the end example: `mongodb://localhost:27017/DATABASE_NAME`)
+    - MONGO_LOCAL_URI or MONGO_URI and MONGO_CERT_PATH (see below)
 
-5. [Optional] Incase you want to use mongodb atlas, fill in the required fields in `.env` and `src/config.py`
-    - `.env`
+5. [Option 1] If you want to use mongo db locally.
+
+    - Set MONGO_LOCAL_URI in `.env`. (Add db name at the end example: `mongodb://localhost:27017/DATABASE_NAME`)
+    - Set MONGO_MODE = 'localhost' in `src/config.py`.
+
+5. [Option 2] If you want to use mongodb atlas
+    - Set in `.env`:
         - MONGO_URI (Add db name at the end
           example: `mongodb+srv://<cluster-url>/DATABASE_NAME?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority`)
         - MONGO_CERT_PATH
-    - `src/config.py`
+    - Set in `src/config.py`:
         - MONGO_MODE = "atlas" (from localhost to atlas)
+
+6. Start the bot. Be in the repository root directory.
 
 ```bash
 python src/main.py
