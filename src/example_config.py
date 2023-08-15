@@ -10,6 +10,7 @@ USE_SENTRY = False  # set True for production
 DELETE_UNUSED_APPLICATION_CMDS = False  # Set True temporarily, as needed
 SYNC_INTERACTIONS = True  # todo research whether this is needed
 ACTIVITY = "interactions.py"  # "Playing <ACTIVITY>"
+MONGO_MODE = 'atlas'  # localhost or atlas
 MONGO_COLLECTIONS = [
     "birthdayCollection",
     "server_birthday_event_opt_in_collection",
