@@ -90,7 +90,10 @@ class BirthdayEvents(Extension):
         choices_list = []
         channels = ctx.guild.channels
         for i, birthday_channel in enumerate(channels):
-            if birthday_channel.type != interactions.models.discord.channel.GuildVoice:
+            if (
+                birthday_channel.type
+                != interactions.models.discord.channel.ChannelType.GUILD_VOICE
+            ):
                 continue
             choices_list.append(
                 Button(
@@ -178,7 +181,7 @@ class BirthdayEvents(Extension):
     if DEV_MODE:
         interval_seconds = 15
     else:
-        interval_seconds = 25200  # 7 hours
+        interval_seconds = 4000  # a bit more than one hour
 
     @Task.create(IntervalTrigger(seconds=interval_seconds))
     async def create_birthday_events(self):
@@ -204,8 +207,6 @@ class BirthdayEvents(Extension):
                 continue
 
             # Select first doc
-            if len(opt_in_document) == 0:
-                continue
             opt_in_document = latest_documents[0]
 
             if opt_in_document is None:
