@@ -90,6 +90,8 @@ class BirthdayEvents(Extension):
         choices_list = []
         channels = ctx.guild.channels
         for i, birthday_channel in enumerate(channels):
+            if birthday_channel.type != interactions.models.discord.channel.GuildVoice:
+                continue
             choices_list.append(
                 Button(
                     custom_id=f"channel_choice_{i}",
