@@ -3,7 +3,7 @@ import logging
 import os
 import traceback
 
-# Third party imports
+import config
 from core.base import CustomClient
 from core.extensions_loader import load_extensions
 from dotenv import load_dotenv
@@ -13,8 +13,8 @@ from interactions import MISSING
 from interactions.api.events import CommandError
 from interactions.ext.debug_extension import DebugExtension
 
+# Third party imports
 # Local imports
-import config
 
 if __name__ == "__main__":
     # load the environmental vars from the .env file
@@ -30,10 +30,7 @@ if __name__ == "__main__":
     logging.info("Logging to logs/interactions.py")
 
     # create our bot instance
-    intents = Intents.DEFAULT  # TODO: decrease intents needed
-    intents.GUILD_MESSAGES = True
-    intents.MESSAGE_CONTENT = True
-    intents.MESSAGES = True
+    intents = Intents.DEFAULT
 
     bot = CustomClient(
         dev_mode=config.DEV_MODE,
