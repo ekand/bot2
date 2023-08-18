@@ -18,8 +18,7 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
     -   id: check-merge-conflict
-
-- repo: https://github.com/PyCQA/isort
-  rev: 5.10.1
-  hooks:
-      - id: isort
+-   repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.10.0
+    hooks:
+    -   id: reorder-python-imports

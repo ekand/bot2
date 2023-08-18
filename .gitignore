@@ -1,3 +1,10 @@
+# github action local settings
+.act/
+
+# Exluce configs
+src/config.py
+.certificate.pem
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

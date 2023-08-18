@@ -1,0 +1,22 @@
+name: Deploy to Google Cloud Platform Compute Engine
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH Remote Commands
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script_stop: true
+          script: |
+              cd /home/${{ secrets.USERNAME }}/deploy_bot2_simply/bot2
+              git pull
+              sudo systemctl restart bot2.service
