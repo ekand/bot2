@@ -14,6 +14,8 @@ from interactions import listen
 from interactions import slash_command
 from interactions import Task
 
+import config
+
 load_dotenv(find_dotenv())
 
 
