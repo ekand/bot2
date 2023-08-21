@@ -222,11 +222,7 @@ class BirthdayEvents(Extension):
                 if member_id in seen_users:
                     continue
                 seen_users.add(member_id)
-                event_date = datetime.datetime(
-                    year=2023,
-                    month=birthday_document["month"],
-                    day=birthday_document["day"],
-                )
+                event_date = birthday_document["next_event_datetime"]
                 now = datetime.datetime.now()
                 if (event_date - now).seconds > 0 and (event_date - now).days <= 3:
                     if (
